@@ -853,6 +853,7 @@ const panel = $('panel');
 function togglePanel(open = !panel.classList.contains('open')) {
   panel.classList.toggle('open', open);
   if (open) renderPanel();
+  savePos();
 }
 panel.addEventListener('click', e => {
   e.stopPropagation();
@@ -870,6 +871,14 @@ panel.addEventListener('click', e => {
   else if (a === 'resetDraw' && confirm('確定重設抽獎結果？')) { state.drawn = []; save(); lottoIdle(); }
   else if (a === 'resetAll' && confirm('確定清除分組、計分和抽獎的全部資料？')) { state = empty(); save(); lottoIdle(); }
 });
+// 另一個視窗（例如筆電上的計分台）改了資料 → 這個視窗（投影）馬上跟著更新
+addEventListener('storage', e => {
+  if (e.key !== KEY) return;
+  try { state = { ...empty(), ...JSON.parse(e.newValue || 'null') }; } catch (err) { state = empty(); }
+  renderPanel(); renderLive(); renderWins();
+  if (slides[cur].id === 'lotto' && !rolling) lottoIdle();
+});
+
 $('pbtn').addEventListener('click', e => { e.stopPropagation(); e.currentTarget.blur(); togglePanel(true); });
 $('imp').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
@@ -899,6 +908,12 @@ function render() {
   if (s.id === 'live') renderLive();
   if (s.id === 'lotto' && !rolling) lottoIdle();
   $('pg').textContent = `${cur + 1} / ${slides.length}`;
+  savePos();
+}
+// 每個視窗各自記住停在哪一頁、計分台有沒有開（sessionStorage：重新整理還在，但不會影響另一個視窗）
+const POS_KEY = 'halloween26-pos';
+function savePos() {
+  try { sessionStorage.setItem(POS_KEY, JSON.stringify({ cur, step, panel: panel.classList.contains('open') })); } catch (e) {}
 }
 function go(i, toStep = 0) {
   cur = clamp(i, 0, slides.length - 1);
@@ -943,7 +958,12 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-initScenes(); renderLive(); renderWins(); fit(); go(0); requestAnimationFrame(loop);
+initScenes(); renderLive(); renderWins(); fit();
+// 重新整理時回到原本的頁面（和計分台狀態）
+let pos = null;
+try { pos = JSON.parse(sessionStorage.getItem(POS_KEY)); } catch (e) {}
+go(pos ? pos.cur : 0, pos ? Math.min(pos.step, +slides[clamp(pos.cur, 0, slides.length - 1)].dataset.steps) : 0);
+if (pos && pos.panel) togglePanel(true); requestAnimationFrame(loop);
 </script>
 </body>
 </html>
