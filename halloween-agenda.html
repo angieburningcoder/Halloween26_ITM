@@ -82,7 +82,6 @@ html,body{margin:0;height:100%;background:#0a0614;overflow:hidden}
 .aw .p{font-size:46px;color:var(--orange);margin:8px 0 12px}
 .grp-svg{position:absolute;top:240px;left:60px;width:1480px;height:600px}
 .aw .d{font-size:28px;color:var(--ink);line-height:1.5}
-.bye{position:absolute;bottom:36px;left:0;right:0;text-align:center;font-size:50px;color:var(--orange);text-shadow:0 0 24px #ff8a1f66}
 
 /* SVG 共用 */
 .fig{fill:var(--panel2);stroke:var(--line);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
@@ -103,7 +102,7 @@ svg text{font-family:inherit}
 .pk path{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round}
 .bat{fill:#120B22}
 
-/* 即時比分 */
+/* 比分揭曉 */
 .teams{position:absolute;top:166px;left:60px;right:60px;bottom:40px;display:flex;gap:50px}
 .team{flex:1;border:4px solid;border-radius:32px;background:var(--panel);padding:24px 36px;display:flex;flex-direction:column}
 .team.t1{border-color:var(--orange)}
@@ -185,6 +184,32 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
       <div class="row" data-now="3"><span class="tm">12:40–13:00</span>遊戲 A｜南瓜鐵人三項</div>
       <div class="row" data-now="4"><span class="tm">13:00–13:15</span>遊戲 B｜先別急著吃棉花糖</div>
       <div class="row" data-now="5"><span class="tm">13:15–13:30</span>頒獎＋抽獎</div>
+    </div>
+  </section>
+
+  <!-- 獎品介紹（開場就先講） -->
+  <section class="slide" data-steps="3">
+    <div class="hd"><h1>今天的獎品<small>Prizes</small></h1><div class="meta">13:15–13:30 頒獎＋抽獎</div></div>
+    <div class="lead">遊戲 A 三關＋遊戲 B，每關<em>贏 +2、輸 +1</em>，全部加總 → 每人 4～8 籤</div>
+    <div class="awards">
+      <div class="aw" data-show="1"><div class="pic"><img src="img/bear.png" alt="清華小熊（棕熊）"><img src="img/panda.png" alt="清華小熊（熊貓）"></div><div class="t">抽獎大獎</div><div class="p">清華小熊吊飾 × 4</div><div class="d">全部人都能抽<br>籤越多，中獎機會越高</div></div>
+      <div class="aw" data-show="2"><div class="pic"><img src="img/bear.png" alt="清華小熊（棕熊）"><img src="img/panda.png" alt="清華小熊（熊貓）"></div><div class="t">最佳扮裝</div><div class="p">清華小熊 × 3</div><div class="d">票數前三名各得一隻<br>點點貼紙貼在想投的人手臂上<br>活動期間都能投，一人一票</div></div>
+      <div class="aw" data-show="3"><div class="pic"><svg viewBox="0 0 200 200" aria-label="零食驚喜包">
+        <g transform="rotate(-8 100 100)">
+          <path d="M52 30 L148 30 L156 172 L44 172 Z" fill="#FF8A1F" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M48 30 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10" fill="none" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M40 172 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10" fill="none" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="62" y="70" width="76" height="62" rx="14" fill="#5B3A99" stroke="#F3E6D0" stroke-width="3"/>
+          <text x="100" y="98" text-anchor="middle" font-size="24" fill="#FFF8EE" font-family="Huninn, sans-serif">零食</text>
+          <text x="100" y="122" text-anchor="middle" font-size="16" fill="#9BE15D" font-family="Huninn, sans-serif">SURPRISE</text>
+          <polygon points="74,52 79,44 84,52" fill="#2A1236"/><polygon points="116,52 121,44 126,52" fill="#2A1236"/>
+          <path d="M84 150 Q100 162 116 150" fill="none" stroke="#2A1236" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <g stroke="#F3E6D0" stroke-width="2.5">
+          <ellipse cx="22" cy="150" rx="13" ry="10" fill="#9BE15D"/><path d="M9 150 l-8 -6 v12 Z M35 150 l8 -6 v12 Z" fill="#9BE15D"/>
+          <ellipse cx="178" cy="60" rx="13" ry="10" fill="#C9A6FF"/><path d="M165 60 l-8 -6 v12 Z M191 60 l8 -6 v12 Z" fill="#C9A6FF"/>
+          <circle cx="182" cy="160" r="10" fill="#FF4FA3"/>
+        </g></svg></div><div class="t">人人有獎</div><div class="p">零食驚喜包 × 32</div><div class="d">每位參加的人都有一包</div></div>
     </div>
   </section>
 
@@ -272,15 +297,6 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
     <div class="note">遊戲 A 三關＋遊戲 B 的籤<em>全部加總</em>，就是每個人的抽獎籤數</div>
   </section>
 
-  <!-- 即時比分（資料來自計分台） -->
-  <section class="slide" data-steps="0" id="live">
-    <div class="hd"><h1>即時比分<small>Live Score</small></h1><div class="meta">每關 贏 +2 ・ 輸 +1（全組每人）</div></div>
-    <div class="teams">
-      <div class="team t1"><div class="tn">第 1 組</div><div class="big"><span id="ls1">0</span>籤 / 人</div><div class="rounds" id="lr1"></div><div class="mem" id="lm1"></div></div>
-      <div class="team t2"><div class="tn">第 2 組</div><div class="big"><span id="ls2">0</span>籤 / 人</div><div class="rounds" id="lr2"></div><div class="mem" id="lm2"></div></div>
-    </div>
-  </section>
-
   <!-- 7 遊戲 B -->
   <section class="slide" data-steps="4" data-scene="b">
     <div class="hd"><h1>遊戲 B｜先別急著吃棉花糖</h1><div class="meta">兩組同時比 ・ 全員下場 ・ 限時 15 分鐘</div></div>
@@ -296,31 +312,13 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
     </div>
   </section>
 
-  <!-- 8 頒獎＋抽獎 -->
-  <section class="slide" data-steps="3">
-    <div class="hd"><h1>頒獎＋抽獎<small>Awards &amp; Lucky Draw</small></h1><div class="meta">13:15–13:30</div></div>
-    <div class="lead">遊戲 A 三關＋遊戲 B，每關<em>贏 +2、輸 +1</em>，全部加總 → 每人 4～8 籤</div>
-    <div class="awards">
-      <div class="aw" data-show="1"><div class="pic"><img src="img/bear.png" alt="清華小熊（棕熊）"><img src="img/panda.png" alt="清華小熊（熊貓）"></div><div class="t">抽獎大獎</div><div class="p">清華小熊吊飾 × 4</div><div class="d">全部人都能抽<br>籤越多，中獎機會越高</div></div>
-      <div class="aw" data-show="2"><div class="pic"><img src="img/bear.png" alt="清華小熊（棕熊）"><img src="img/panda.png" alt="清華小熊（熊貓）"></div><div class="t">最佳扮裝</div><div class="p">清華小熊 × 3</div><div class="d">票數前三名各得一隻<br>點點貼紙貼在想投的人手臂上<br>活動期間都能投，一人一票</div></div>
-      <div class="aw" data-show="3"><div class="pic"><svg viewBox="0 0 200 200" aria-label="零食驚喜包">
-        <g transform="rotate(-8 100 100)">
-          <path d="M52 30 L148 30 L156 172 L44 172 Z" fill="#FF8A1F" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M48 30 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10" fill="none" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M40 172 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10" fill="none" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
-          <rect x="62" y="70" width="76" height="62" rx="14" fill="#5B3A99" stroke="#F3E6D0" stroke-width="3"/>
-          <text x="100" y="98" text-anchor="middle" font-size="24" fill="#FFF8EE" font-family="Huninn, sans-serif">零食</text>
-          <text x="100" y="122" text-anchor="middle" font-size="16" fill="#9BE15D" font-family="Huninn, sans-serif">SURPRISE</text>
-          <polygon points="74,52 79,44 84,52" fill="#2A1236"/><polygon points="116,52 121,44 126,52" fill="#2A1236"/>
-          <path d="M84 150 Q100 162 116 150" fill="none" stroke="#2A1236" stroke-width="4" stroke-linecap="round"/>
-        </g>
-        <g stroke="#F3E6D0" stroke-width="2.5">
-          <ellipse cx="22" cy="150" rx="13" ry="10" fill="#9BE15D"/><path d="M9 150 l-8 -6 v12 Z M35 150 l8 -6 v12 Z" fill="#9BE15D"/>
-          <ellipse cx="178" cy="60" rx="13" ry="10" fill="#C9A6FF"/><path d="M165 60 l-8 -6 v12 Z M191 60 l8 -6 v12 Z" fill="#C9A6FF"/>
-          <circle cx="182" cy="160" r="10" fill="#FF4FA3"/>
-        </g></svg></div><div class="t">人人有獎</div><div class="p">零食驚喜包 × 32</div><div class="d">每位參加的人都有一包</div></div>
+  <!-- 比分揭曉：兩個遊戲都結束後才顯示（資料來自計分台） -->
+  <section class="slide" data-steps="0" id="live">
+    <div class="hd"><h1>比分揭曉<small>Final Score</small></h1><div class="meta">每關 贏 +2 ・ 輸 +1（全組每人）</div></div>
+    <div class="teams">
+      <div class="team t1"><div class="tn">第 1 組</div><div class="big"><span id="ls1">0</span>籤 / 人</div><div class="rounds" id="lr1"></div><div class="mem" id="lm1"></div></div>
+      <div class="team t2"><div class="tn">第 2 組</div><div class="big"><span id="ls2">0</span>籤 / 人</div><div class="rounds" id="lr2"></div><div class="mem" id="lm2"></div></div>
     </div>
-    <div class="bye" data-show="3">Happy Halloween 🎃</div>
   </section>
 
   <!-- 抽獎（Enter 抽一位） -->
@@ -777,7 +775,7 @@ function renderPanel() {
         `<button class="btn t${t}${state.result[i] === t ? ' sel' : ''}" data-act="win" data-v="${i},${t}">第 ${t} 組贏</button>`).join('')}</div>`).join('') +
       `<div class="srow"><span class="lab">目前每人籤數</span>${[1, 2].map(t => `<span style="color:${TC[t]}">第 ${t} 組：${teamPer(t)} 籤</span>`).join('　')}</div>
       <div class="pinfo" style="margin-top:16px">按錯直接按另一組；再按一次已選的按鈕可以取消該關結果</div>
-      <div class="tools"><button class="btn" data-act="goto" data-v="live">→ 到即時比分頁</button><button class="btn" data-act="goto" data-v="lotto">→ 到抽獎頁</button></div>`;
+      <div class="tools"><button class="btn" data-act="goto" data-v="live">→ 到比分揭曉頁</button><button class="btn" data-act="goto" data-v="lotto">→ 到抽獎頁</button></div>`;
   } else {
     const rows = [...members(1), ...members(2), ...ROSTER.filter(p => !state.team[p.name])];
     body.innerHTML = `<div class="tools">
@@ -810,7 +808,7 @@ function renderWins() {
 function lottoIdle() {
   const n = state.drawn.length;
   $('dname').textContent = n >= PRIZES ? '抽獎結束 🎉' : `按 Enter 抽第 ${n + 1} 位`;
-  $('dsub').textContent = '';
+  $('dsub').textContent = n >= PRIZES ? 'Happy Halloween 🎃' : '';
 }
 
 // 依籤數比例抽一位，中過的人不再抽
