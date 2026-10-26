@@ -73,13 +73,16 @@ html,body{margin:0;height:100%;background:#0a0614;overflow:hidden}
 .card p{font-size:26px;line-height:1.6;color:var(--ink);margin:0;border-top:3px dashed var(--purple);padding-top:14px}
 
 /* 頒獎 */
-.awards{position:absolute;top:250px;left:80px;right:80px;display:flex;gap:40px}
-.aw{flex:1;border:3px solid var(--purple);background:var(--panel);border-radius:32px;padding:36px 24px;text-align:center}
-.aw .t{font-size:30px;color:var(--muted)}
-.aw .p{font-size:48px;color:var(--orange);margin:16px 0}
+.awards{position:absolute;top:236px;left:80px;right:80px;display:flex;gap:40px}
+.aw{flex:1;border:3px solid var(--purple);background:var(--panel);border-radius:32px;padding:22px 24px 26px;text-align:center}
+.aw .pic{height:190px;display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
+.aw .pic img,.aw .pic svg{max-height:100%;max-width:100%;min-width:0;filter:drop-shadow(0 6px 14px #0008)}
+.aw .pic img{max-width:46%}
+.aw .t{font-size:28px;color:var(--muted)}
+.aw .p{font-size:46px;color:var(--orange);margin:8px 0 12px}
 .grp-svg{position:absolute;top:240px;left:60px;width:1480px;height:600px}
 .aw .d{font-size:28px;color:var(--ink);line-height:1.5}
-.bye{position:absolute;bottom:70px;left:0;right:0;text-align:center;font-size:50px;color:var(--orange);text-shadow:0 0 24px #ff8a1f66}
+.bye{position:absolute;bottom:36px;left:0;right:0;text-align:center;font-size:50px;color:var(--orange);text-shadow:0 0 24px #ff8a1f66}
 
 /* SVG 共用 */
 .fig{fill:var(--panel2);stroke:var(--line);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
@@ -298,9 +301,24 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
     <div class="hd"><h1>頒獎＋抽獎<small>Awards &amp; Lucky Draw</small></h1><div class="meta">13:15–13:30</div></div>
     <div class="lead">遊戲 A 三關＋遊戲 B，每關<em>贏 +2、輸 +1</em>，全部加總 → 每人 4～8 籤</div>
     <div class="awards">
-      <div class="aw" data-show="1"><div class="t">抽獎大獎</div><div class="p">清華小熊吊飾 × 4</div><div class="d">全部人都能抽<br>籤越多，中獎機會越高</div></div>
-      <div class="aw" data-show="2"><div class="t">最佳扮裝</div><div class="p">清華小熊 × 3</div><div class="d">票數前三名各得一隻<br>點點貼紙貼在想投的人手臂上<br>活動期間都能投，一人一票</div></div>
-      <div class="aw" data-show="3"><div class="t">人人有獎</div><div class="p">零食驚喜包 × 32</div><div class="d">每位參加的人都有一包</div></div>
+      <div class="aw" data-show="1"><div class="pic"><img src="img/bear.png" alt="清華小熊（棕熊）"><img src="img/panda.png" alt="清華小熊（熊貓）"></div><div class="t">抽獎大獎</div><div class="p">清華小熊吊飾 × 4</div><div class="d">全部人都能抽<br>籤越多，中獎機會越高</div></div>
+      <div class="aw" data-show="2"><div class="pic"><img src="img/bear.png" alt="清華小熊（棕熊）"><img src="img/panda.png" alt="清華小熊（熊貓）"></div><div class="t">最佳扮裝</div><div class="p">清華小熊 × 3</div><div class="d">票數前三名各得一隻<br>點點貼紙貼在想投的人手臂上<br>活動期間都能投，一人一票</div></div>
+      <div class="aw" data-show="3"><div class="pic"><svg viewBox="0 0 200 200" aria-label="零食驚喜包">
+        <g transform="rotate(-8 100 100)">
+          <path d="M52 30 L148 30 L156 172 L44 172 Z" fill="#FF8A1F" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M48 30 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10" fill="none" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M40 172 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10 l8 10 l8 -10" fill="none" stroke="#F3E6D0" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="62" y="70" width="76" height="62" rx="14" fill="#5B3A99" stroke="#F3E6D0" stroke-width="3"/>
+          <text x="100" y="98" text-anchor="middle" font-size="24" fill="#FFF8EE" font-family="Huninn, sans-serif">零食</text>
+          <text x="100" y="122" text-anchor="middle" font-size="16" fill="#9BE15D" font-family="Huninn, sans-serif">SURPRISE</text>
+          <polygon points="74,52 79,44 84,52" fill="#2A1236"/><polygon points="116,52 121,44 126,52" fill="#2A1236"/>
+          <path d="M84 150 Q100 162 116 150" fill="none" stroke="#2A1236" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <g stroke="#F3E6D0" stroke-width="2.5">
+          <ellipse cx="22" cy="150" rx="13" ry="10" fill="#9BE15D"/><path d="M9 150 l-8 -6 v12 Z M35 150 l8 -6 v12 Z" fill="#9BE15D"/>
+          <ellipse cx="178" cy="60" rx="13" ry="10" fill="#C9A6FF"/><path d="M165 60 l-8 -6 v12 Z M191 60 l8 -6 v12 Z" fill="#C9A6FF"/>
+          <circle cx="182" cy="160" r="10" fill="#FF4FA3"/>
+        </g></svg></div><div class="t">人人有獎</div><div class="p">零食驚喜包 × 32</div><div class="d">每位參加的人都有一包</div></div>
     </div>
     <div class="bye" data-show="3">Happy Halloween 🎃</div>
   </section>
