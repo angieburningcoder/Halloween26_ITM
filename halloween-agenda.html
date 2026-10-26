@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一定南不倒你</title>
+<style>
+@font-face{font-family:"Huninn";src:url("fonts/jf-openhuninn-2.1.ttf") format("truetype")}
+:root{--bg:#1B1230;--panel:#281A44;--panel2:#1F1438;--line:#F3E6D0;--orange:#FF8A1F;--orange-d:#C55A00;
+  --purple:#8A5CD6;--lilac:#C9A6FF;--muted:#A996CF;--ink:#EDE3FF;--green:#9BE15D;--pasta:#F4D27A;--ground:#6E5A9A}
+html,body{margin:0;height:100%;background:#0a0614;overflow:hidden}
+#deck{position:absolute;left:50%;top:50%;width:1600px;height:900px;overflow:hidden;color:var(--ink);user-select:none;cursor:default;
+  font-family:"Huninn","Yuanti TC","PingFang TC","Microsoft JhengHei",sans-serif;font-weight:400;font-synthesis:none;
+  background:radial-gradient(circle at 12% 18%,#fff6 0 1.5px,transparent 2px) 0 0/310px 270px,
+             radial-gradient(circle at 70% 60%,#fff4 0 1px,transparent 1.5px) 0 0/230px 190px,var(--bg)}
+.slide{position:absolute;inset:0;display:none}
+.slide.active{display:block}
+[data-show]{opacity:0;transition:opacity .45s}
+[data-show].on{opacity:1}
+
+/* 標題列 */
+.hd{height:126px;background:#2A1748;border-bottom:5px solid var(--orange);display:flex;align-items:center;justify-content:space-between;padding:0 60px}
+.hd h1{font-size:56px;margin:0;white-space:nowrap;font-weight:400;color:var(--orange);letter-spacing:2px}
+.hd h1 small{font-size:26px;color:var(--muted);margin-left:18px;letter-spacing:0}
+.hd .meta{font-size:28px;color:var(--line)}
+
+/* 封面 */
+.cover{flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.cover.active{display:flex}
+.cover #night{position:absolute;inset:0}
+.cover .kicker{font-size:36px;letter-spacing:8px;color:var(--purple);position:relative}
+.cover h1{font-size:150px;margin:6px 0 18px;font-weight:400;letter-spacing:10px;color:var(--orange);position:relative;
+  text-shadow:0 0 30px #ff8a1f66}
+.cover .info{font-size:38px;color:var(--line);position:relative}
+.cover .hint{position:absolute;bottom:36px;font-size:20px;color:var(--muted);opacity:.6}
+
+/* 流程 */
+.agenda{position:absolute;top:180px;left:160px;right:160px}
+.row{display:flex;align-items:center;gap:60px;padding:22px 40px;margin-bottom:16px;border-radius:26px;border:3px solid var(--purple);
+  background:var(--panel);font-size:42px;transition:background .3s,color .3s,opacity .3s}
+.row .tm{width:300px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.agenda.has-now .row{opacity:.35}
+.agenda .row.now{opacity:1;background:var(--orange);border-color:var(--orange);color:var(--bg)}
+.agenda .row.now .tm{color:var(--bg)}
+
+/* 遊戲 A 各關 */
+.round{position:absolute;top:166px;left:60px;right:60px;bottom:50px;display:flex;gap:50px}
+.stage{flex:0 0 1000px;background:var(--panel2);border:3px solid var(--purple);border-radius:28px;overflow:hidden}
+.stage svg{width:100%;height:100%;display:block}
+.side{flex:1;display:flex;flex-direction:column;justify-content:center}
+.badge{display:flex;align-items:center;gap:14px;font-size:26px;color:var(--muted)}
+.badge b{font-weight:400;background:var(--orange);color:var(--bg);border-radius:40px;padding:6px 20px}
+.side h2{font-size:58px;margin:18px 0 0;font-weight:400;color:var(--orange)}
+.side .sub{font-size:26px;color:var(--muted)}
+.side hr{border:0;border-top:3px dashed var(--purple);margin:26px 0}
+.side p{font-size:31px;line-height:1.6;color:var(--ink);margin:0 0 8px}
+.side p.rank{color:var(--green);margin-top:14px}
+
+/* 計分頁 */
+.lead{position:absolute;top:172px;left:0;right:0;text-align:center;font-size:40px;color:var(--line)}
+.lead em{font-style:normal;color:var(--orange)}
+.score-svg{position:absolute;top:250px;left:60px;width:1480px;height:560px}
+.note{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:32px;color:var(--muted)}
+.note em{font-style:normal;color:var(--green)}
+
+/* 遊戲 B 卡片 */
+.cards{position:absolute;top:166px;left:60px;right:60px;bottom:50px;display:flex;gap:40px}
+.card{flex:1;border:3px solid var(--purple);background:var(--panel);border-radius:28px;padding:22px 22px 18px;display:flex;flex-direction:column}
+.card h3{margin:0;font-size:34px;font-weight:400;color:var(--orange);display:flex;align-items:center;gap:12px}
+.num{display:inline-flex;width:46px;height:46px;border-radius:50%;background:var(--orange);color:var(--bg);align-items:center;justify-content:center;font-size:26px;flex:none}
+.card .pn{background:var(--panel2);border-radius:20px;margin:16px 0;height:330px}
+.card .pn svg{width:100%;height:100%;display:block}
+.card p{font-size:26px;line-height:1.6;color:var(--ink);margin:0;border-top:3px dashed var(--purple);padding-top:14px}
+
+/* 頒獎 */
+.awards{position:absolute;top:250px;left:80px;right:80px;display:flex;gap:40px}
+.aw{flex:1;border:3px solid var(--purple);background:var(--panel);border-radius:32px;padding:36px 24px;text-align:center}
+.aw .t{font-size:30px;color:var(--muted)}
+.aw .p{font-size:48px;color:var(--orange);margin:16px 0}
+.grp-svg{position:absolute;top:240px;left:60px;width:1480px;height:600px}
+.aw .d{font-size:28px;color:var(--ink);line-height:1.5}
+.bye{position:absolute;bottom:70px;left:0;right:0;text-align:center;font-size:50px;color:var(--orange);text-shadow:0 0 24px #ff8a1f66}
+
+/* SVG 共用 */
+.fig{fill:var(--panel2);stroke:var(--line);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.ground{stroke:var(--ground);stroke-width:3}
+.ball{fill:var(--orange);stroke:var(--orange-d);stroke-width:2.5}
+.bowl{fill:var(--panel);stroke:var(--line);stroke-width:4}
+.hat{fill:#5B3A99;stroke:var(--line);stroke-width:4;stroke-linejoin:round}
+.flag{fill:var(--orange);stroke:var(--line);stroke-width:3;stroke-linejoin:round}
+.guide{fill:none;stroke:var(--purple);stroke-width:3;stroke-dasharray:8 9}
+svg text{font-family:inherit}
+.cap{font-size:32px;fill:var(--line);text-anchor:middle}
+.lbl{font-size:24px;fill:var(--muted);text-anchor:middle}
+.cnt{font-size:34px;fill:var(--orange);text-anchor:end}
+.tw line{stroke:var(--pasta);stroke-width:4;stroke-linecap:round}
+.tw rect{fill:#FFF8EE;stroke:#d9c9b0;stroke-width:2}
+.pk ellipse{fill:var(--orange);stroke:var(--orange-d);stroke-width:2.5}
+.pk .rib{fill:none}
+.pk path{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round}
+.bat{fill:#120B22}
+
+/* 即時比分 */
+.teams{position:absolute;top:166px;left:60px;right:60px;bottom:40px;display:flex;gap:50px}
+.team{flex:1;border:4px solid;border-radius:32px;background:var(--panel);padding:24px 36px;display:flex;flex-direction:column}
+.team.t1{border-color:var(--orange)}
+.team.t2{border-color:var(--lilac)}
+.tn{font-size:44px}
+.t1 .tn{color:var(--orange)}
+.t2 .tn{color:var(--lilac)}
+.big{font-size:36px;color:var(--muted)}
+.big span{font-size:120px;color:var(--ink);margin-right:10px}
+.rounds{display:flex;gap:12px;margin:6px 0 16px}
+.rd{flex:1;text-align:center;border-radius:14px;padding:8px 0;font-size:20px;background:var(--panel2);color:var(--muted)}
+.rd b{display:block;font-weight:400;font-size:28px}
+.rd.win{background:var(--green);color:var(--bg)}
+.rd.lose{color:var(--ink)}
+.mem{columns:2;font-size:22px;line-height:1.5;border-top:3px dashed var(--purple);padding-top:12px}
+
+/* 抽獎 */
+.drum{position:absolute;top:220px;left:300px;right:300px;height:300px;border:4px solid var(--orange);border-radius:40px;background:var(--panel);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 50px #ff8a1f44}
+#dname{font-size:104px;color:var(--orange);white-space:nowrap}
+#dname.rolling{color:var(--ink)}
+#dsub{font-size:30px;color:var(--muted);margin-top:8px;min-height:40px}
+.wins{position:absolute;top:580px;left:160px;right:160px;display:flex;gap:30px}
+.slot{flex:1;border:3px dashed var(--purple);border-radius:24px;padding:20px 10px;text-align:center;font-size:36px;color:var(--muted)}
+.slot.got{border-style:solid;border-color:var(--orange);color:var(--ink)}
+.slot small{display:block;font-size:20px;color:var(--muted)}
+
+/* 計分台（S 鍵） */
+#panel{position:absolute;inset:0;background:#0d0818;display:none;z-index:10;padding:36px 60px;box-sizing:border-box;cursor:auto;user-select:text}
+#panel.open{display:block}
+.ptop{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.ptop h2{margin:0 20px 0 0;font-weight:400;font-size:40px;color:var(--orange)}
+.tab,.btn{font:inherit;font-size:24px;border:2px solid var(--purple);background:var(--panel);color:var(--ink);border-radius:14px;padding:8px 22px;cursor:pointer}
+.tab.on{background:var(--purple);color:#fff}
+.ptop .x{margin-left:auto}
+.btn.t1{border-color:var(--orange)}
+.btn.t2{border-color:var(--lilac)}
+.btn.sel.t1{background:var(--orange);color:var(--bg)}
+.btn.sel.t2{background:var(--lilac);color:var(--bg)}
+#pbody{height:740px;overflow:auto}
+.pinfo{font-size:24px;margin-bottom:14px;color:var(--muted)}
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.chip{border:2px solid var(--ground);border-radius:14px;padding:12px 14px;font-size:24px;cursor:pointer;background:var(--panel);display:flex;justify-content:space-between;align-items:center}
+.chip small{color:var(--muted);font-size:16px}
+.chip.t1{background:var(--orange);border-color:var(--orange);color:var(--bg)}
+.chip.t2{background:var(--lilac);border-color:var(--lilac);color:var(--bg)}
+.chip.t1 small,.chip.t2 small{color:var(--bg)}
+.srow{display:flex;align-items:center;gap:20px;font-size:30px;padding:16px 0;border-bottom:2px dashed var(--panel)}
+.srow .lab{width:300px}
+.tools{display:flex;gap:12px;margin:14px 0;flex-wrap:wrap}
+table.stat{border-collapse:collapse;width:100%;font-size:22px}
+.stat td,.stat th{padding:6px 12px;border-bottom:1px solid var(--panel);text-align:center}
+.stat th{color:var(--muted);font-weight:400}
+
+#pbtn{position:absolute;left:20px;bottom:12px;font:inherit;font-size:16px;color:var(--muted);background:none;border:1px solid transparent;border-radius:10px;padding:4px 10px;opacity:.35;cursor:pointer;z-index:5}
+#pbtn:hover{opacity:1;border-color:var(--purple)}
+#pg{position:absolute;right:24px;bottom:14px;font-size:16px;color:var(--muted);opacity:.6}
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <!-- 1 封面 -->
+  <section class="slide cover" data-steps="0" data-scene="cover">
+    <svg id="night" viewBox="0 0 1600 900"></svg>
+    <svg width="230" height="210" viewBox="-115 -110 230 210" style="position:relative"><g id="cvp"></g></svg>
+    <div class="kicker">2026 科管所 HALLOWEEN</div>
+    <h1>一定南不倒你</h1>
+    <div class="info">10/28（三）12:00–13:30 ・ 台積 405</div>
+    <div class="hint">Enter / → 下一步 ・ ← 上一步 ・ F 全螢幕</div>
+  </section>
+
+  <!-- 2 活動流程 -->
+  <section class="slide" data-steps="5">
+    <div class="hd"><h1>活動流程<small>Agenda</small></h1><div class="meta">10/28（三）・ 台積 405</div></div>
+    <div class="agenda">
+      <div class="row" data-now="1"><span class="tm">12:00–12:10</span>報到＋發放糖果禮包</div>
+      <div class="row" data-now="2"><span class="tm">12:10–12:40</span>現場分組＋吃飯</div>
+      <div class="row" data-now="3"><span class="tm">12:40–13:00</span>遊戲 A｜南瓜鐵人三項</div>
+      <div class="row" data-now="4"><span class="tm">13:00–13:15</span>遊戲 B｜先別急著吃棉花糖</div>
+      <div class="row" data-now="5"><span class="tm">13:15–13:30</span>頒獎＋抽獎</div>
+    </div>
+  </section>
+
+  <!-- 扮裝投票 -->
+  <section class="slide" data-steps="0" data-scene="vote">
+    <div class="hd"><h1>扮裝投票<small>Costume Vote</small></h1><div class="meta">整場活動都能投 ・ 一人一票</div></div>
+    <div class="round">
+      <div class="stage"><svg id="vote" viewBox="0 0 1000 674"></svg></div>
+      <div class="side">
+        <div class="badge"><b>最佳扮裝</b>票數前三名</div>
+        <h2>貼點點投一票</h2>
+        <div class="sub">Dot Sticker Vote</div>
+        <hr>
+        <p>每人一張點點貼紙＝一票</p>
+        <p>貼在你最喜歡的扮裝者手臂上</p>
+        <p>活動期間隨時都能投</p>
+        <p class="rank">→ 前三名各得清華小熊一隻</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 現場分組 -->
+  <section class="slide" data-steps="1" data-scene="grp">
+    <div class="hd"><h1>現場分組<small>Teams</small></h1><div class="meta">32 人 ÷ 2 ＝ 每組 16 人</div></div>
+    <div class="lead">報到完直接<em>對半分成兩組</em>，遊戲 A、B 兩組同時比</div>
+    <svg class="grp-svg" id="grp" viewBox="0 0 1480 600"></svg>
+  </section>
+
+  <!-- 3 遊戲 A 第 1 關 -->
+  <section class="slide" data-steps="0" data-scene="a1">
+    <div class="hd"><h1>遊戲 A｜南瓜鐵人三項<small>Pumpkin Triathlon</small></h1><div class="meta">兩組同時比 ・ 每組 16 人 ・ 三關車輪戰</div></div>
+    <div class="round">
+      <div class="stage"><svg id="a1" viewBox="0 0 1000 674"></svg></div>
+      <div class="side">
+        <div class="badge"><b>第 1 關 / 3</b>7 人 ・ 最多 5 分鐘</div>
+        <h2>免洗筷夾南瓜</h2>
+        <div class="sub">Chopstick Pass</div>
+        <hr>
+        <p>7 人一排連線作戰</p>
+        <p>用免洗筷把 20 顆南瓜球接力夾進對面的碗</p>
+        <p class="rank">→ 先夾完 20 顆的組贏這關</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 遊戲 A 第 2 關 -->
+  <section class="slide" data-steps="0" data-scene="a2">
+    <div class="hd"><h1>遊戲 A｜南瓜鐵人三項<small>Pumpkin Triathlon</small></h1><div class="meta">兩組同時比 ・ 每組 16 人 ・ 三關車輪戰</div></div>
+    <div class="round">
+      <div class="stage"><svg id="a2" viewBox="0 0 1000 674"></svg></div>
+      <div class="side">
+        <div class="badge"><b>第 2 關 / 3</b>3 人 ・ 最多 5 分鐘</div>
+        <h2>倒立巫師帽接球</h2>
+        <div class="sub">Wizard Hat Catch</div>
+        <hr>
+        <p>一人背對隊友，往後丟南瓜球</p>
+        <p>兩位隊友抱著倒立的巫師帽，在範圍內移動接球</p>
+        <p class="rank">→ 先接滿 20 顆的組贏這關</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 遊戲 A 第 3 關 -->
+  <section class="slide" data-steps="0" data-scene="a3">
+    <div class="hd"><h1>遊戲 A｜南瓜鐵人三項<small>Pumpkin Triathlon</small></h1><div class="meta">兩組同時比 ・ 每組 16 人 ・ 三關車輪戰</div></div>
+    <div class="round">
+      <div class="stage"><svg id="a3" viewBox="0 0 1000 674"></svg></div>
+      <div class="side">
+        <div class="badge"><b>第 3 關 / 3</b>6 人 ・ 最多 5 分鐘</div>
+        <h2>湯匙運南瓜接力</h2>
+        <div class="sub">Spoon Relay</div>
+        <hr>
+        <p>A、B 兩邊各站 3 人</p>
+        <p>用湯匙運南瓜球跑到對面，交給下一位，再排到隊伍最後</p>
+        <p class="rank">→ 先運完 20 顆的組贏這關</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 遊戲 A 計分 -->
+  <section class="slide" data-steps="2" data-scene="as">
+    <div class="hd"><h1>遊戲 A｜怎麼算籤<small>Scoring</small></h1><div class="meta">每關最多 5 分鐘，提早完成就喊停</div></div>
+    <div class="lead"><em>每一關</em>都算：先完成的組贏這關，兩組都有加籤</div>
+    <svg class="score-svg" id="as" viewBox="0 0 1480 560"></svg>
+    <div class="note">遊戲 A 三關＋遊戲 B 的籤<em>全部加總</em>，就是每個人的抽獎籤數</div>
+  </section>
+
+  <!-- 即時比分（資料來自計分台） -->
+  <section class="slide" data-steps="0" id="live">
+    <div class="hd"><h1>即時比分<small>Live Score</small></h1><div class="meta">每關 贏 +2 ・ 輸 +1（全組每人）</div></div>
+    <div class="teams">
+      <div class="team t1"><div class="tn">第 1 組</div><div class="big"><span id="ls1">0</span>籤 / 人</div><div class="rounds" id="lr1"></div><div class="mem" id="lm1"></div></div>
+      <div class="team t2"><div class="tn">第 2 組</div><div class="big"><span id="ls2">0</span>籤 / 人</div><div class="rounds" id="lr2"></div><div class="mem" id="lm2"></div></div>
+    </div>
+  </section>
+
+  <!-- 7 遊戲 B -->
+  <section class="slide" data-steps="4" data-scene="b">
+    <div class="hd"><h1>遊戲 B｜先別急著吃棉花糖</h1><div class="meta">兩組同時比 ・ 全員下場 ・ 限時 15 分鐘</div></div>
+    <div class="cards">
+      <div class="card" data-show="1"><h3><span class="num">1</span>拿材料</h3><div class="pn"><svg id="b1" viewBox="0 0 340 320"></svg></div>
+        <p>每組拿到：生義大利麵、棉花糖、塑膠小南瓜</p></div>
+      <div class="card" data-show="2"><h3><span class="num">2</span>合力蓋塔</h3><div class="pn"><svg id="b2" viewBox="0 0 340 320"></svg></div>
+        <p>全組一起用麵條＋棉花糖蓋高塔</p></div>
+      <div class="card" data-show="3"><h3><span class="num">3</span>南瓜放塔頂</h3><div class="pn"><svg id="b3" viewBox="0 0 340 320"></svg></div>
+        <p>塔頂放上小南瓜，要放穩才算數</p></div>
+      <div class="card" data-show="4"><h3><span class="num">4</span>時間到比高度</h3><div class="pn"><svg id="b4" viewBox="0 0 340 320"></svg></div>
+        <p>15 分鐘一到，塔比較高的組贏：贏 +2、另一組 +1 籤</p></div>
+    </div>
+  </section>
+
+  <!-- 8 頒獎＋抽獎 -->
+  <section class="slide" data-steps="3">
+    <div class="hd"><h1>頒獎＋抽獎<small>Awards &amp; Lucky Draw</small></h1><div class="meta">13:15–13:30</div></div>
+    <div class="lead">遊戲 A 三關＋遊戲 B，每關<em>贏 +2、輸 +1</em>，全部加總 → 每人 4～8 籤</div>
+    <div class="awards">
+      <div class="aw" data-show="1"><div class="t">抽獎大獎</div><div class="p">清華小熊吊飾 × 4</div><div class="d">全部人都能抽<br>籤越多，中獎機會越高</div></div>
+      <div class="aw" data-show="2"><div class="t">最佳扮裝</div><div class="p">清華小熊 × 3</div><div class="d">票數前三名各得一隻<br>點點貼紙貼在想投的人手臂上<br>活動期間都能投，一人一票</div></div>
+      <div class="aw" data-show="3"><div class="t">人人有獎</div><div class="p">零食驚喜包 × 32</div><div class="d">每位參加的人都有一包</div></div>
+    </div>
+    <div class="bye" data-show="3">Happy Halloween 🎃</div>
+  </section>
+
+  <!-- 抽獎（Enter 抽一位） -->
+  <section class="slide" data-steps="0" id="lotto">
+    <div class="hd"><h1>抽獎｜清華小熊吊飾 × 4<small>Lucky Draw</small></h1><div class="meta">依籤數比例抽 ・ 中過不重複</div></div>
+    <div class="drum"><div id="dname"></div><div id="dsub"></div></div>
+    <div class="wins" id="wins"></div>
+  </section>
+
+  <!-- 計分台：S 鍵開關，工作人員用 -->
+  <div id="panel">
+    <div class="ptop">
+      <h2>計分台</h2>
+      <button class="tab" data-act="tab" data-v="team">分組</button>
+      <button class="tab" data-act="tab" data-v="score">計分</button>
+      <button class="tab" data-act="tab" data-v="stat">統計</button>
+      <button class="btn x" data-act="close">關閉（S / Esc）</button>
+    </div>
+    <div id="pbody"></div>
+    <input type="file" id="imp" accept=".json" hidden>
+  </div>
+
+  <div id="pg"></div>
+  <button id="pbtn" title="計分台（S）">⚙ 計分台</button>
+</div>
+
+<script>
+// 參加名單（中文名去掉姓氏、英文名照原樣）。格式：[名字, 年級]
+const ROSTER_LIST = [
+  ['宜婷', '碩一'], ['芃蓁', '碩一'], ['修睿', '碩一'], ['宇晨', '碩一'],
+  ['立筠', '碩一'], ['芷綺', '碩一'], ['茗楷', '碩一'], ['韻如', '碩一'],
+  ['怡如', '碩一'], ['庭瑋', '碩一'], ['宛妤', '碩一'], ['詩涵', '碩一'],
+  ['佳徵', '碩一'], ['柔云', '碩一'], ['富貴', '碩一'], ['賢政', '碩一'],
+  ['郡佑', '碩一'], ['竺諼', '碩一'], ['杏昀', '碩一'], ['榮豐', '碩一'],
+  ['Claire', '碩一'], ['亮蓁', '碩一'], ['芷宜', '碩一'], ['金雲', '碩一'],
+  ['維燦', '碩二'], ['Jovan', '碩二'], ['Daniel', '碩二'], ['譽諄', '碩二'],
+  ['逸傑', '碩二'], ['欣琪', '碩二'], ['方翊', '碩二'], ['承榆', '碩二'],
+];
+
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const lerp2 = (p, q, k) => [lerp(p[0], q[0], k), lerp(p[1], q[1], k)];
+const ease = s => 0.5 - 0.5 * Math.cos(Math.PI * s);
+const easeOut = s => 1 - Math.pow(1 - s, 3);
+const backOut = s => { const c = 1.7, x = s - 1; return 1 + (c + 1) * x * x * x + c * x * x; };
+// 拋物線：從 p 到 q，最高點比兩端連線高 h
+const hop = (p, q, h, s) => [lerp(p[0], q[0], s), lerp(p[1], q[1], s) - 4 * h * s * (1 - s)];
+const mv = (el, x, y, extra = '') => el.setAttribute('transform', `translate(${x},${y})${extra}`);
+
+const S = 1.4;   // 火柴人放大倍率
+const G = 560;   // 遊戲 A 舞台地面 y
+
+// 火柴人：arms 為 [x1,y1,x2,y2] 線段（未放大座標，肩膀在 0,-80）
+function fig(x, g, arms, s = S) {
+  const a = arms.map(l => `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}"/>`).join('');
+  return `<g class="fig" transform="translate(${x},${g}) scale(${s})">
+    <line x1="0" y1="-93" x2="0" y2="-45"/><line x1="0" y1="-45" x2="-15" y2="0"/><line x1="0" y1="-45" x2="15" y2="0"/>
+    ${a}<circle cx="0" cy="-110" r="17"/></g>`;
+}
+function pumpkin(x, y, r, face = false) {
+  const f = face ? `<g fill="#2A1236">
+      <polygon points="${x - r * .55},${y - r * .1} ${x - r * .3},${y - r * .5} ${x - r * .1},${y - r * .1}"/>
+      <polygon points="${x + r * .1},${y - r * .1} ${x + r * .3},${y - r * .5} ${x + r * .55},${y - r * .1}"/>
+      <path d="M${x - r * .65} ${y + r * .2} Q${x} ${y + r * .85} ${x + r * .65} ${y + r * .2} L${x + r * .4} ${y + r * .35} L${x + r * .2} ${y + r * .2} L${x} ${y + r * .38} L${x - r * .2} ${y + r * .2} L${x - r * .4} ${y + r * .35} Z"/></g>` : '';
+  return `<g class="pk"><path d="M${x} ${y - r * 0.9} q1 ${-r * 0.5} ${r * 0.45} ${-r * 0.65}"/>
+    <ellipse cx="${x}" cy="${y}" rx="${r * 1.15}" ry="${r}"/><ellipse class="rib" cx="${x}" cy="${y}" rx="${r * 0.45}" ry="${r}"/>${f}</g>`;
+}
+function bowl(cx, g, w = 110, d = 40) {
+  return `<path class="bowl" d="M${cx - w / 2} ${g - d} L${cx + w / 2} ${g - d} A${w / 2} ${d} 0 0 1 ${cx - w / 2} ${g - d} Z"/>`;
+}
+const ground = (x1, x2, y) => `<line class="ground" x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/>`;
+const bat = id => `<g id="${id}"><path class="bat" d="M0 4 C-8 -6 -22 -12 -40 -6 C-32 -2 -30 4 -28 10 C-22 4 -14 6 -10 12 C-6 6 -3 6 0 10 C3 6 6 6 10 12 C14 6 22 4 28 10 C30 4 32 -2 40 -6 C22 -12 8 -6 0 4 Z M-5 -2 L-7 -10 L-2 -4 L2 -4 L7 -10 L5 -2 Z"/></g>`;
+
+// 義大利麵＋棉花糖塔；prog 0→1 依序畫出每根麵條
+function tower(cx, g, w, h, prog = 1, ns = 12) {
+  const bl = [cx - w / 2, g], br = [cx + w / 2, g], tp = [cx, g - h];
+  const mL = lerp2(bl, tp, 0.45), mR = lerp2(br, tp, 0.45);
+  const E = [[bl, br], [bl, mL], [br, mR], [mL, mR], [bl, mR], [mL, tp], [mR, tp]];
+  const N = [[bl, 0], [br, 0], [mL, 1], [mR, 2], [tp, 5]];
+  let s = '<g class="tw">';
+  E.forEach((e, i) => {
+    const k = clamp(prog * E.length - i);
+    if (k > 0) { const q = lerp2(e[0], e[1], k); s += `<line x1="${e[0][0]}" y1="${e[0][1]}" x2="${q[0]}" y2="${q[1]}"/>`; }
+  });
+  N.forEach(([p, i]) => { if (prog * E.length > i) s += `<rect x="${p[0] - ns / 2}" y="${p[1] - ns / 2}" width="${ns}" height="${ns}" rx="4"/>`; });
+  return s + '</g>';
+}
+
+/* ---------- 場景：初始化（靜態部分） ---------- */
+// A1：左碗 → 7 雙筷子尖 → 右碗
+const A1S = 1.15, A1X = [150, 250, 350, 450, 550, 650, 750];
+const A1P = [[70, 512], ...A1X.map(x => [x + 66 * A1S, G - 60 * A1S]), [900, 512]];
+const A2HAND = [789, 395];
+const a2cx = t => 330 + 120 * Math.sin(2 * Math.PI * t / 7);
+// A3：兩邊排隊位置（前 → 後）與交棒點
+const A3SLOT = { A: [300, 235, 170], B: [700, 765, 830] }, A3HAND = { A: 370, B: 630 };
+
+function initScenes() {
+  // 封面夜空：月亮、星星、蝙蝠
+  let stars = '';
+  for (let i = 0; i < 40; i++) {
+    const x = (i * 397) % 1600, y = (i * 263) % 520;
+    stars += `<circle cx="${x}" cy="${y}" r="${1 + (i % 3) * 0.7}" fill="#fff" opacity="${0.3 + (i % 4) * 0.15}"/>`;
+  }
+  $('night').innerHTML = `${stars}
+    <circle cx="1330" cy="190" r="150" fill="#FCEBC2" opacity=".12"/>
+    <circle cx="1330" cy="190" r="110" fill="#FCEBC2"/>
+    <circle cx="1295" cy="160" r="18" fill="#EBD7A8"/><circle cx="1365" cy="215" r="24" fill="#EBD7A8"/><circle cx="1310" cy="240" r="10" fill="#EBD7A8"/>
+    ${bat('bt0')}${bat('bt1')}${bat('bt2')}
+    <path d="M0 900 L0 820 Q200 780 400 830 T800 815 T1200 830 T1600 800 L1600 900 Z" fill="#120B22"/>`;
+  $('cvp').innerHTML = pumpkin(0, 15, 80, true);
+
+  // A1 免洗筷夾南瓜（7 人）
+  const guide = A1P.slice(0, -1).map((p, i) => {
+    const q = A1P[i + 1], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2 - 2 * 60;
+    return `M${p[0]} ${p[1]} Q${mx} ${my} ${q[0]} ${q[1]}`;
+  }).join(' ');
+  const chop = [[0, -80, 36, -66], [0, -80, 30, -60], [28, -70, 66, -62], [28, -63, 66, -58]];
+  $('a1').innerHTML = `
+    <text class="cap" x="500" y="95">7 個人用免洗筷，把南瓜球一路夾到對面的碗</text>
+    <path class="guide" d="${guide}"/>
+    ${ground(20, 980, G)}
+    <circle class="ball" cx="50" cy="516" r="13"/><circle class="ball" cx="70" cy="508" r="13"/><circle class="ball" cx="90" cy="516" r="13"/>
+    <g id="a1got"></g>
+    ${bowl(70, G)}${bowl(900, G)}
+    ${A1X.map(x => fig(x, G, chop, A1S)).join('')}
+    <circle id="a1b" class="ball" r="13"/>
+    <text id="a1n" class="cnt" x="970" y="60"></text>`;
+
+  // A2 倒立巫師帽接球
+  const hat = `<polygon class="hat" points="-68,${G - 100} 68,${G - 100} 0,${G - 22}"/>
+    <ellipse class="hat" cx="0" cy="${G - 100}" rx="72" ry="12"/>`;
+  $('a2').innerHTML = `
+    <text class="cap" x="500" y="95">一人背對往後丟，兩人抱著倒立巫師帽接</text>
+    ${ground(20, 980, G)}
+    <g id="a2c">
+      ${fig(-110, G, [[0, -80, 28, -68], [0, -80, 28, -74]])}
+      ${fig(110, G, [[0, -80, -28, -68], [0, -80, -28, -74]])}
+      ${hat}
+    </g>
+    ${fig(820, G, [[0, -80, -22, -118], [0, -80, 16, -56]])}
+    <text class="lbl" x="330" y="614">← 抱著帽子移動接球 →</text>
+    <text class="lbl" x="820" y="614">背對往後丟</text>
+    <circle id="a2b" class="ball" r="13"/>
+    <text id="a2n" class="cnt" x="970" y="60"></text>`;
+
+  // A3 湯匙接力（兩邊各 3 人）
+  const flag = (x, d, t) => `<line class="ground" x1="${x}" y1="${G}" x2="${x}" y2="${G - 200}" style="stroke:var(--line)"/>
+    <polygon class="flag" points="${x},${G - 200} ${x + 70 * d},${G - 176} ${x},${G - 152}"/>
+    <text class="cap" x="${x}" y="${G - 220}">${t}</text>`;
+  let ppl = '';
+  for (let i = 0; i < 6; i++) ppl += `<g id="rp${i}"><g class="fig" transform="scale(${S})">
+      <line x1="0" y1="-93" x2="0" y2="-45"/>
+      <line id="rl${i}a" x1="0" y1="-45" x2="-15" y2="0"/><line id="rl${i}b" x1="0" y1="-45" x2="15" y2="0"/>
+      <line x1="0" y1="-80" x2="-10" y2="-58"/><line x1="0" y1="-80" x2="30" y2="-70"/>
+      <line x1="28" y1="-70" x2="46" y2="-75"/><ellipse cx="51" cy="-76" rx="7" ry="3.5"/>
+      <circle id="rb${i}" class="ball" cx="51" cy="-85" r="8"/>
+      <circle cx="0" cy="-110" r="17"/></g></g>`;
+  $('a3').innerHTML = `
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#8A5CD6"/></marker></defs>
+    <text class="cap" x="500" y="95">A、B 各 3 人，用湯匙運南瓜球來回接力</text>
+    <line x1="390" y1="140" x2="610" y2="140" stroke="#8A5CD6" stroke-width="4" marker-end="url(#ah)"/>
+    <line x1="390" y1="175" x2="610" y2="175" stroke="#8A5CD6" stroke-width="4" marker-start="url(#ah)"/>
+    ${ground(20, 980, G)}
+    ${flag(80, 1, 'A')}${flag(920, -1, 'B')}
+    ${ppl}
+    <text id="a3n" class="cnt" x="970" y="60"></text>`;
+
+  // A 計分頒獎台（兩組）
+  $('as').innerHTML = ground(300, 1180, 540) + PODIUM.map((p, i) => `
+    <rect id="pd${i}" class="bowl" x="${p.x}" width="300" rx="10" style="fill:var(--panel)"/>
+    <text id="pr${i}" class="cap" x="${p.x + 150}" style="font-size:52px">${p.r}</text>
+    <text id="pl${i}" class="cap" x="${p.x + 150}" style="fill:var(--orange);font-size:40px">+${p.t} 張籤 / 人</text>`).join('');
+
+  // B1 材料
+  let sp = ''; for (let x = 52; x <= 100; x += 7) sp += `<line x1="${x}" y1="120" x2="${x}" y2="250"/>`;
+  let mm = ''; for (const x of [132, 176]) for (const y of [128, 172, 216]) mm += `<rect x="${x}" y="${y}" width="34" height="34" rx="11"/>`;
+  $('b1').innerHTML = `
+    <g id="b1s" class="tw">${sp}<rect x="40" y="178" width="72" height="16" rx="6" style="fill:var(--purple);stroke:none"/></g>
+    <g id="b1m" class="tw">${mm}</g>
+    <g id="b1p">${pumpkin(272, 195, 32)}</g>
+    <text class="lbl" x="76" y="292" style="font-size:20px">義大利麵</text>
+    <text class="lbl" x="170" y="292" style="font-size:20px">棉花糖</text>
+    <text class="lbl" x="272" y="292" style="font-size:20px">小南瓜</text>`;
+
+  // B2 合力蓋塔
+  $('b2').innerHTML = `${ground(10, 330, 290)}
+    ${fig(48, 290, [[0, -80, 30, -66], [0, -80, 24, -56]], 1)}
+    ${fig(292, 290, [[0, -80, -30, -72], [0, -80, -24, -54]], 1)}
+    <g id="b2t"></g>`;
+
+  // B3 南瓜放塔頂
+  $('b3').innerHTML = `${ground(10, 330, 290)}${tower(170, 290, 130, 170)}
+    <g id="b3p">${pumpkin(0, 0, 20)}</g>
+    <text id="b3t" class="lbl" x="268" y="88" style="fill:var(--green);font-size:26px">穩住了！</text>`;
+
+  // B4 比高度（右側量尺）
+  let ru = `<line class="ground" x1="326" y1="290" x2="326" y2="60"/>`;
+  for (let y = 290; y >= 70; y -= 20) ru += `<line class="ground" x1="318" y1="${y}" x2="326" y2="${y}"/>`;
+  $('b4').innerHTML = `${ground(10, 330, 290)}${ru}<g id="b4t"></g>`;
+
+  // 扮裝投票：投票者走過去，把貼紙貼到扮裝者手臂上
+  $('vote').innerHTML = `
+    <text class="cap" x="500" y="95">把點點貼紙貼在最喜歡的扮裝者手臂上</text>
+    ${ground(20, 980, G)}
+    ${fig(VOTE_X, G, [[0, -80, -36, -62], [0, -80, 14, -56]])}
+    <g transform="translate(${VOTE_X},${G}) scale(${S})">
+      <polygon class="hat" points="-30,-124 30,-124 8,-178"/><ellipse class="hat" cx="0" cy="-124" rx="34" ry="6"/></g>
+    <text class="lbl" x="${VOTE_X}" y="614">扮裝者</text>
+    <g id="vdots"></g>
+    <g id="vp"><g class="fig" transform="scale(${S})">
+      <line x1="0" y1="-93" x2="0" y2="-45"/>
+      <line id="vla" x1="0" y1="-45" x2="-15" y2="0"/><line id="vlb" x1="0" y1="-45" x2="15" y2="0"/>
+      <line x1="0" y1="-80" x2="-10" y2="-58"/><line id="varm" x1="0" y1="-80" x2="20" y2="-60"/>
+      <circle cx="0" cy="-110" r="17"/></g></g>
+    <circle id="vs" r="11" stroke="#fff" stroke-width="2"/>`;
+
+  // 現場分組：32 人 → 兩組各 16 人
+  $('grp').innerHTML = GRP.map((_, i) => `<g id="gp${i}">${fig(0, 0, [[0, -80, -14, -55], [0, -80, 14, -55]], 0.6)}</g>`).join('') +
+    GTEAM.map((t, i) => `<text id="gl${i}" class="cap" x="${t.cx}" y="70" style="font-size:44px;fill:${t.color}">第 ${i + 1} 組 ・ 16 人</text>`).join('');
+}
+
+// 扮裝者位置、手臂上的貼紙位置、貼紙顏色
+const VOTE_X = 640;
+const VOTE_SPOTS = [0.45, 0.65, 0.85].map(k => [VOTE_X - 36 * S * k, G - (80 - 18 * k) * S]);
+const VOTE_COLORS = ['#FF4FA3', '#9BE15D', '#4FC3FF'];
+
+const GTEAM = [{ x: 180, cx: 330, color: '#FF8A1F' }, { x: 1000, cx: 1150, color: '#C9A6FF' }];
+const GRP = [...Array(32)].map((_, i) => {
+  const t = i % 2, k = Math.floor(i / 2);
+  return {
+    team: t,
+    from: [400 + (i % 8) * 95 + ((i * 37) % 30) - 15, 200 + Math.floor(i / 8) * 115 + ((i * 53) % 20) - 10],
+    to: [GTEAM[t].x + (k % 4) * 100, 200 + Math.floor(k / 4) * 115],
+  };
+});
+
+const PODIUM = [
+  { x: 420, h: 170, r: '輸這關', t: 1, step: 1 },
+  { x: 760, h: 290, r: '贏這關 🏆', t: 2, step: 2 },
+];
+const B4T = [{ cx: 100, h: 120, r: '+1' }, { cx: 225, h: 200, r: '贏 +2' }];
+
+/* ---------- A3 接力：簡單的排隊模擬 ---------- */
+let r3 = null;
+const other = s => (s === 'A' ? 'B' : 'A');
+function a3reset() {
+  r3 = { last: 0, phase: 'wait', timer: 0.6, runner: -1, n: 0, Q: { A: [0, 1, 2], B: [3, 4, 5] },
+    P: [0, 1, 2, 3, 4, 5].map(i => { const side = i < 3 ? 'A' : 'B', x = A3SLOT[side][i % 3]; return { x, tx: x, side, ball: i === 0 }; }) };
+}
+function a3slots() { for (const s of ['A', 'B']) r3.Q[s].forEach((id, k) => (r3.P[id].tx = A3SLOT[s][k])); }
+
+/* ---------- 場景：每一幀 ---------- */
+// t = 進入此頁後的秒數；st(k) = 第 k 步開始後的秒數（還沒到就是 null）
+const scenes = {
+  cover(t) {
+    mv($('cvp'), 0, Math.sin(t * 2) * 6, ` rotate(${Math.sin(t * 1.3) * 4})`);
+    [[0, 260, 0], [1, 420, 2.1], [2, 330, 4.3]].forEach(([i, y, off]) => {
+      const u = ((t + off) % 12) / 12;
+      mv($('bt' + i), lerp(-80, 1700, u), y + Math.sin(t * 2 + i) * 30, ` scale(${1 - i * 0.2},${(1 - i * 0.2) * (0.55 + 0.45 * Math.abs(Math.sin(t * 9 + i)))})`);
+    });
+  },
+
+  a1(t) {
+    const N = A1P.length - 1, F = 0.6, H = 0.72, T = H * N, u = t % T;
+    const seg = Math.min(N - 1, Math.floor(u / H)), l = u - seg * H;
+    const b = $('a1b');
+    const p = l < F ? hop(A1P[seg], A1P[seg + 1], 60, ease(l / F)) : A1P[seg + 1];
+    b.setAttribute('cx', p[0]); b.setAttribute('cy', p[1]);
+    b.style.opacity = (seg === N - 1 && l >= F) ? 0 : 1;
+    const n = Math.min(20, Math.floor(t / T) + (u >= (N - 1) * H + F ? 1 : 0));
+    $('a1n').textContent = `🎃 ${n} / 20`;
+    const got = Math.min(n, 3), g = $('a1got');
+    if (g.dataset.n != got) {
+      g.dataset.n = got;
+      g.innerHTML = [[880, 516], [900, 508], [920, 516]].slice(0, got)
+        .map(([x, y]) => `<circle class="ball" cx="${x}" cy="${y}" r="13"/>`).join('');
+    }
+  },
+
+  a2(t) {
+    const F = 1.4, T = 2.8, u = t % T, t0 = t - u, cx = a2cx(t);
+    mv($('a2c'), cx, 0);
+    let p;
+    if (u < F) p = hop(A2HAND, [a2cx(t0 + F), G - 108], 260, u / F);
+    else if (u < F + 0.7) p = [cx, G - 108];
+    else p = A2HAND;
+    const b = $('a2b');
+    b.setAttribute('cx', p[0]); b.setAttribute('cy', p[1]);
+    $('a2n').textContent = `🎃 ${Math.min(20, Math.floor(t / T) + (u >= F ? 1 : 0))} / 20`;
+  },
+
+  a3(t) {
+    if (!r3 || t < r3.last) a3reset();
+    const R = r3, dt = Math.min(0.25, t - R.last); R.last = t;
+    if (R.phase === 'wait') {
+      // 拿球的人出發，同一側隊伍往前補
+      R.timer -= dt;
+      if (R.timer <= 0) {
+        const id = R.P.findIndex(p => p.ball), s = R.P[id].side;
+        R.Q[s].shift(); a3slots();
+        R.runner = id; R.P[id].tx = A3HAND[other(s)]; R.phase = 'run';
+      }
+    } else if (R.phase === 'run') {
+      // 跑到對面交棒
+      const p = R.P[R.runner];
+      if (Math.abs(p.x - p.tx) < 0.5) {
+        R.phase = 'hand'; R.timer = 0.4; R.n++;
+        p.ball = false; R.P[R.Q[other(p.side)][0]].ball = true;
+      }
+    } else {
+      // 交完棒，排到對面隊伍最後
+      R.timer -= dt;
+      if (R.timer <= 0) {
+        const p = R.P[R.runner]; p.side = other(p.side);
+        R.Q[p.side].push(R.runner); R.phase = 'wait'; R.timer = 0;
+      }
+    }
+    R.P.forEach((p, i) => {
+      const fast = i === R.runner && R.phase === 'run', d = p.tx - p.x, moving = Math.abs(d) > 0.5;
+      p.x += Math.sign(d) * Math.min(Math.abs(d), (fast ? 230 : 120) * dt);
+      const dir = moving ? Math.sign(d) : (p.side === 'A' ? 1 : -1), sw = Math.sin(t * (fast ? 14 : 10) + i);
+      $(`rl${i}a`).setAttribute('x2', moving ? sw * 16 : -15);
+      $(`rl${i}b`).setAttribute('x2', moving ? -sw * 16 : 15);
+      $(`rb${i}`).style.display = p.ball ? '' : 'none';
+      mv($('rp' + i), p.x, G - (moving ? Math.abs(sw) * 5 : 0), ` scale(${dir},1)`);
+    });
+    $('a3n').textContent = `🎃 ${Math.min(20, R.n)} / 20`;
+  },
+
+  vote(t) {
+    // 一輪 5 秒：走過去 → 貼貼紙 → 走回來；三輪後清空重來
+    const T = 5, u = t % T, c = Math.floor(t / T) % 3, near = 470, far = 180;
+    let x = far, moving = false, reach = false;
+    if (u < 1.5) { x = lerp(far, near, ease(u / 1.5)); moving = true; }
+    else if (u < 2.6) { x = near; reach = true; }
+    else if (u < 4.1) { x = lerp(near, far, ease((u - 2.6) / 1.5)); moving = true; }
+    const sw = Math.sin(t * 10);
+    $('vla').setAttribute('x2', moving ? sw * 16 : -15);
+    $('vlb').setAttribute('x2', moving ? -sw * 16 : 15);
+    $('varm').setAttribute('x2', reach ? 38 : 20); $('varm').setAttribute('y2', reach ? -72 : -60);
+    const dir = u >= 2.6 && u < 4.1 ? -1 : 1;
+    mv($('vp'), x, G - (moving ? Math.abs(sw) * 5 : 0), ` scale(${dir},1)`);
+    // 貼紙：拿在手上 → 飛到手臂 → 貼住
+    const hand = [x + 38 * S * dir, G - 72 * S], spot = VOTE_SPOTS[c], s = $('vs');
+    s.setAttribute('fill', VOTE_COLORS[c]);
+    const p = u < 1.6 ? hand : u < 2.1 ? hop(hand, spot, 30, ease((u - 1.6) / 0.5)) : null;
+    s.style.display = p ? '' : 'none';
+    if (p) { s.setAttribute('cx', p[0]); s.setAttribute('cy', p[1]); }
+    const stuck = c + (u >= 2.1 ? 1 : 0), d = $('vdots');
+    if (d.dataset.n != stuck) {
+      d.dataset.n = stuck;
+      d.innerHTML = VOTE_SPOTS.slice(0, stuck).map(([sx, sy], i) =>
+        `<circle cx="${sx}" cy="${sy}" r="11" fill="${VOTE_COLORS[i]}" stroke="#fff" stroke-width="2"/>`).join('');
+    }
+  },
+
+  grp(t, st) {
+    const s = st(1);
+    GRP.forEach((g, i) => {
+      const k = s == null ? 0 : ease(clamp((s - i * 0.03) / 1.2));
+      const p = lerp2(g.from, g.to, k);
+      const el = $('gp' + i);
+      mv(el, p[0], p[1] - Math.sin(Math.PI * k) * 30 + (s == null ? Math.sin(t * 3 + i) * 3 : 0));
+      el.firstChild.style.stroke = k > 0.5 ? GTEAM[g.team].color : '';
+    });
+    GTEAM.forEach((_, i) => ($('gl' + i).style.opacity = s == null ? 0 : clamp((s - 1.8) / 0.4)));
+  },
+
+  as(t, st) {
+    PODIUM.forEach((p, i) => {
+      const s = st(p.step), k = s == null ? 0 : easeOut(clamp(s / 0.8)), h = p.h * k;
+      const r = $('pd' + i); r.setAttribute('y', 540 - h); r.setAttribute('height', h);
+      const tr = $('pr' + i); tr.setAttribute('y', 540 - h / 2 + 18); tr.style.opacity = k;
+      const tl = $('pl' + i); tl.setAttribute('y', 540 - h - 26); tl.style.opacity = s == null ? 0 : clamp((s - 0.6) / 0.4);
+    });
+  },
+
+  b(t, st) {
+    // 1 材料依序彈出
+    const s1 = st(1);
+    [['b1s', 0, 76, 185], ['b1m', 0.4, 170, 190], ['b1p', 0.8, 272, 195]].forEach(([id, d, cx, cy]) => {
+      const k = s1 == null ? 0 : backOut(clamp((s1 - d) / 0.5));
+      $(id).setAttribute('transform', `translate(${cx},${cy}) scale(${k}) translate(${-cx},${-cy})`);
+    });
+    // 2 一根根蓋起來（每 5 秒重播）
+    const s2 = st(2);
+    if (s2 != null) $('b2t').innerHTML = tower(170, 290, 130, 190, clamp((s2 % 5) / 3));
+    // 3 南瓜掉到塔頂、晃一晃、穩住
+    const s3 = st(3), top = 290 - 170 - 6 - 20;
+    if (s3 != null) {
+      const c = s3 % 5;
+      let y = top, rot = 0;
+      if (c < 0.7) y = lerp(-40, top, Math.pow(c / 0.7, 2));
+      else { const d = c - 0.7; rot = 14 * Math.exp(-3 * d) * Math.sin(10 * d); }
+      $('b3p').setAttribute('transform', `translate(170,${y}) rotate(${rot} 0 20)`);
+      $('b3t').style.opacity = clamp((c - 1.6) / 0.3);
+    } else $('b3p').setAttribute('transform', 'translate(170,-60)');
+    // 4 兩座塔長高、比高度
+    const s4 = st(4);
+    if (s4 != null) {
+      const k = easeOut(clamp(s4 / 1.5)), lo = clamp((s4 - 1.5) / 0.4);
+      $('b4t').innerHTML = B4T.map(b => {
+        const h = b.h * k;
+        return tower(b.cx, 290, 90, h, 1, 11) + pumpkin(b.cx, 290 - h - 19, 14) +
+          `<text class="lbl" x="${b.cx}" y="${290 - b.h - 46}" style="opacity:${lo};fill:var(--orange)">${b.r}</text>`;
+      }).join('');
+    }
+  },
+};
+
+/* ---------- 計分資料（存在瀏覽器 localStorage） ---------- */
+const ROSTER = ROSTER_LIST.map(([name, year]) => ({ name, year }));
+const ROUNDS = ['A-1 筷子', 'A-2 帽子', 'A-3 湯匙', 'B 高塔'];
+const TC = { 1: '#FF8A1F', 2: '#C9A6FF' };
+const PRIZES = 4, KEY = 'halloween26-score';
+const empty = () => ({ team: {}, result: [0, 0, 0, 0], drawn: [] });
+let state = empty(), canSave = true;
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s) state = { ...state, ...s }; } catch (e) { canSave = false; }
+// 儲存有問題時，計分台最上面顯示提醒
+const warn = () => canSave ? '' :
+  '<div class="pinfo" style="color:#FF6B6B">⚠ 這個瀏覽器不能儲存資料，重新整理就會不見：請改用 Chrome 直接打開 halloween-agenda.html。</div>';
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  renderPanel(); renderLive(); renderWins();
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// 某組在第 i 關每人拿到幾籤（還沒比 = 0）
+const roundPts = (t, i) => !t || !state.result[i] ? 0 : state.result[i] === t ? 2 : 1;
+const teamPer = t => ROUNDS.reduce((s, _, i) => s + roundPts(t, i), 0);
+const tickets = p => teamPer(state.team[p.name]);
+const members = t => ROSTER.filter(p => state.team[p.name] === t);
+
+let ptab = 'team';
+function renderPanel() {
+  document.querySelectorAll('#panel .tab').forEach(b => b.classList.toggle('on', b.dataset.v === ptab));
+  const body = $('pbody');
+  if (ptab === 'team') {
+    const info = [1, 2].map(t => {
+      const m = members(t);
+      return `<span style="color:${TC[t]}">第 ${t} 組 ${m.length} 人</span>（碩一 ${m.filter(p => p.year === '碩一').length}・碩二 ${m.filter(p => p.year === '碩二').length}）`;
+    }).join('　') + `　尚未點選 ${ROSTER.filter(p => !state.team[p.name]).length} 人`;
+    body.innerHTML = `${warn()}<div class="pinfo">點一下名字＝第 1 組，再點一下＝第 2 組，點第三下取消（點錯可以再點回來）</div>
+      <div class="pinfo" style="color:var(--ink)">${info}</div>
+      <div class="chips">${ROSTER.map(p => `<div class="chip t${state.team[p.name] || 0}" data-act="chip" data-v="${esc(p.name)}">${esc(p.name)}<small>${p.year}</small></div>`).join('')}</div>
+      <div class="tools" style="margin-top:20px"><button class="btn" data-act="clearTeams">清除全部分組</button></div>`;
+  } else if (ptab === 'score') {
+    body.innerHTML = ROUNDS.map((r, i) => `<div class="srow"><span class="lab">${r}</span>${[1, 2].map(t =>
+        `<button class="btn t${t}${state.result[i] === t ? ' sel' : ''}" data-act="win" data-v="${i},${t}">第 ${t} 組贏</button>`).join('')}</div>`).join('') +
+      `<div class="srow"><span class="lab">目前每人籤數</span>${[1, 2].map(t => `<span style="color:${TC[t]}">第 ${t} 組：${teamPer(t)} 籤</span>`).join('　')}</div>
+      <div class="pinfo" style="margin-top:16px">按錯直接按另一組；再按一次已選的按鈕可以取消該關結果</div>
+      <div class="tools"><button class="btn" data-act="goto" data-v="live">→ 到即時比分頁</button><button class="btn" data-act="goto" data-v="lotto">→ 到抽獎頁</button></div>`;
+  } else {
+    const rows = [...members(1), ...members(2), ...ROSTER.filter(p => !state.team[p.name])];
+    body.innerHTML = `<div class="tools">
+        <button class="btn" data-act="csv">匯出 CSV</button><button class="btn" data-act="json">匯出備份</button><button class="btn" data-act="import">匯入備份</button>
+        <button class="btn" data-act="resetDraw">重設抽獎</button><button class="btn" data-act="resetAll">全部重設</button></div>
+      <table class="stat"><tr><th>姓名</th><th>年級</th><th>組別</th>${ROUNDS.map(r => `<th>${r}</th>`).join('')}<th>合計</th><th>中獎</th></tr>
+      ${rows.map(p => { const t = state.team[p.name]; return `<tr><td>${esc(p.name)}</td><td>${p.year}</td>
+        <td style="color:${TC[t] || 'inherit'}">${t ? `第 ${t} 組` : '—'}</td>${ROUNDS.map((_, i) => `<td>${roundPts(t, i) || ''}</td>`).join('')}
+        <td style="color:var(--orange)">${tickets(p)}</td><td>${state.drawn.includes(p.name) ? '🎁' : ''}</td></tr>`; }).join('')}</table>`;
+  }
+}
+
+function renderLive() {
+  [1, 2].forEach(t => {
+    $('ls' + t).textContent = teamPer(t);
+    $('lr' + t).innerHTML = ROUNDS.map((r, i) => {
+      const w = state.result[i];
+      return `<div class="rd ${!w ? '' : w === t ? 'win' : 'lose'}">${r}<b>${!w ? '—' : w === t ? '贏 +2' : '輸 +1'}</b></div>`;
+    }).join('');
+    $('lm' + t).innerHTML = members(t).map(p => esc(p.name)).join('<br>') || '<span style="color:var(--muted)">現場分組後，這裡會列出組員</span>';
+  });
+}
+
+function renderWins() {
+  $('wins').innerHTML = [...Array(PRIZES)].map((_, i) => {
+    const n = state.drawn[i];
+    return `<div class="slot${n ? ' got' : ''}"><small>第 ${i + 1} 位</small>${n ? esc(n) : '？'}</div>`;
+  }).join('');
+}
+function lottoIdle() {
+  const n = state.drawn.length;
+  $('dname').textContent = n >= PRIZES ? '抽獎結束 🎉' : `按 Enter 抽第 ${n + 1} 位`;
+  $('dsub').textContent = '';
+}
+
+// 依籤數比例抽一位，中過的人不再抽
+let rolling = false;
+function draw() {
+  const pool = ROSTER.filter(p => !state.drawn.includes(p.name)).map(p => [p, tickets(p)]).filter(([, w]) => w > 0);
+  if (!pool.length) { $('dname').textContent = '還沒有人有籤'; $('dsub').textContent = '先按 S 開計分台分組、記分'; return; }
+  let r = Math.random() * pool.reduce((s, [, w]) => s + w, 0), win = pool[pool.length - 1][0];
+  for (const [p, w] of pool) { if ((r -= w) < 0) { win = p; break; } }
+  rolling = true;
+  const el = $('dname'), names = pool.map(([p]) => p.name);
+  el.classList.add('rolling'); $('dsub').textContent = '';
+  let delay = 50;
+  const tick = () => {
+    if (delay > 320) {
+      rolling = false; el.classList.remove('rolling');
+      state.drawn.push(win.name); save();
+      el.textContent = win.name; $('dsub').textContent = `恭喜！（${tickets(win)} 籤）`;
+      return;
+    }
+    el.textContent = names[Math.floor(Math.random() * names.length)];
+    delay *= 1.12; setTimeout(tick, delay);
+  };
+  tick();
+}
+
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function exportCSV() {
+  const head = ['姓名', '年級', '組別', ...ROUNDS, '合計', '中獎'];
+  const rows = ROSTER.map(p => { const t = state.team[p.name];
+    return [p.name, p.year, t || '', ...ROUNDS.map((_, i) => roundPts(t, i)), tickets(p), state.drawn.includes(p.name) ? 'Y' : '']; });
+  const csv = [head, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  download('halloween26-score.csv', '﻿' + csv, 'text/csv');
+}
+
+const panel = $('panel');
+function togglePanel(open = !panel.classList.contains('open')) {
+  panel.classList.toggle('open', open);
+  if (open) renderPanel();
+}
+panel.addEventListener('click', e => {
+  e.stopPropagation();
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, v = b.dataset.v;
+  if (a === 'tab') { ptab = v; renderPanel(); }
+  else if (a === 'close') togglePanel(false);
+  else if (a === 'chip') { const t = ((state.team[v] || 0) + 1) % 3; if (t) state.team[v] = t; else delete state.team[v]; save(); }
+  else if (a === 'win') { const [i, t] = v.split(',').map(Number); state.result[i] = state.result[i] === t ? 0 : t; save(); }
+  else if (a === 'goto') { togglePanel(false); go(slides.indexOf($(v))); }
+  else if (a === 'csv') exportCSV();
+  else if (a === 'json') download('halloween26-backup.json', JSON.stringify(state, null, 2), 'application/json');
+  else if (a === 'import') $('imp').click();
+  else if (a === 'clearTeams' && confirm('確定清除全部分組？')) { state.team = {}; save(); }
+  else if (a === 'resetDraw' && confirm('確定重設抽獎結果？')) { state.drawn = []; save(); lottoIdle(); }
+  else if (a === 'resetAll' && confirm('確定清除分組、計分和抽獎的全部資料？')) { state = empty(); save(); lottoIdle(); }
+});
+$('pbtn').addEventListener('click', e => { e.stopPropagation(); e.currentTarget.blur(); togglePanel(true); });
+$('imp').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  f.text().then(txt => {
+    try {
+      const s = JSON.parse(txt);
+      if (!s.team || !Array.isArray(s.result)) throw 0;
+      state = { ...empty(), ...s }; save(); alert('已匯入備份');
+    } catch (err) { alert('這不是有效的備份檔'); }
+    e.target.value = '';
+  });
+});
+
+/* ---------- 導覽 ---------- */
+const slides = [...document.querySelectorAll('.slide')];
+let cur = 0, step = 0, slideStart = 0, stepStart = [];
+
+function render() {
+  slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+  const s = slides[cur];
+  s.querySelectorAll('[data-show]').forEach(e => e.classList.toggle('on', step >= +e.dataset.show));
+  const ag = s.querySelector('.agenda');
+  if (ag) {
+    ag.classList.toggle('has-now', step > 0);
+    ag.querySelectorAll('[data-now]').forEach(e => e.classList.toggle('now', step === +e.dataset.now));
+  }
+  if (s.id === 'live') renderLive();
+  if (s.id === 'lotto' && !rolling) lottoIdle();
+  $('pg').textContent = `${cur + 1} / ${slides.length}`;
+}
+function go(i, toStep = 0) {
+  cur = clamp(i, 0, slides.length - 1);
+  step = toStep;
+  slideStart = performance.now();
+  // 往回翻時直接顯示完成狀態
+  stepStart = []; for (let k = 1; k <= step; k++) stepStart[k] = slideStart - 1e5;
+  render();
+}
+function next() {
+  // 抽獎頁：還沒抽完時 Enter = 抽一位
+  if (slides[cur].id === 'lotto' && (rolling || state.drawn.length < PRIZES)) { if (!rolling) draw(); return; }
+  if (step < +slides[cur].dataset.steps) { step++; stepStart[step] = performance.now(); render(); }
+  else if (cur < slides.length - 1) go(cur + 1);
+}
+function prev() {
+  if (step > 0) { step--; render(); }
+  else if (cur > 0) go(cur - 1, +slides[cur - 1].dataset.steps);
+}
+
+addEventListener('keydown', e => {
+  // 用 e.code 判斷實體按鍵，開著中文輸入法也有效
+  if (e.code === 'KeyS' || (e.key === 'Escape' && panel.classList.contains('open'))) { e.preventDefault(); togglePanel(); return; }
+  if (panel.classList.contains('open')) return;   // 計分台開著時不翻頁
+  if (['Enter', ' ', 'ArrowRight', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); next(); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+  else if (e.key === 'Home') go(0);
+  else if (e.code === 'KeyF') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  else if (/^Digit[0-9]$/.test(e.code)) { const d = +e.code.slice(5), n = d === 0 ? 10 : d; if (n <= slides.length) go(n - 1); }
+});
+$('deck').addEventListener('click', next);
+
+function fit() {
+  const k = Math.min(innerWidth / 1600, innerHeight / 900);
+  $('deck').style.transform = `translate(-50%,-50%) scale(${k})`;
+}
+addEventListener('resize', fit);
+
+function loop(now) {
+  const name = slides[cur].dataset.scene;
+  if (name) scenes[name]((now - slideStart) / 1000, k => stepStart[k] == null ? null : (now - stepStart[k]) / 1000);
+  requestAnimationFrame(loop);
+}
+
+initScenes(); renderLive(); renderWins(); fit(); go(0); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

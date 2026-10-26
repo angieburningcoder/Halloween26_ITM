@@ -1,0 +1,12 @@
+.DS_Store
+.claude/
+
+# 舊的名單檔（現在名單已改成去姓氏、寫在 HTML 裡）
+roster.local.js
+roster.demo.js
+
+# 企劃書與其他圖檔不進 repo（遊戲示意圖 GameA_EN.png / GameB_EN.png 保留）
+*.pdf
+*.jpg
+image-*.png
+invite*.png
