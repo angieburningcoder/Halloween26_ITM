@@ -667,7 +667,7 @@ function initScenes() {
     <rect id="pd${i}" class="bowl" x="${p.x}" width="300" rx="10" style="fill:var(--panel)"/>
     <text id="pr${i}" class="cap" x="${p.x + 150}" style="font-size:52px">${p.r}</text>
     <text id="pl${i}" class="cap" x="${p.x + 150}" style="fill:var(--orange);font-size:40px">+${p.t} 張籤 / 人</text>`).join('') + `
-    <g id="asb">${tower(1110, 540, 150, 220)}${pumpkin(1110, 540 - 220 - 6 - 24, 24)}
+    <g id="asb">${tower(1110, 540, 150, 220)}<g id="asbp">${pumpkin(0, -24, 24)}</g>
       <text class="cap" x="1110" y="160" style="fill:var(--green)">遊戲 B 加碼：南瓜撐住</text>
       <text class="cap" x="1110" y="216" style="fill:var(--orange);font-size:40px">全組再 +2 張籤 / 人</text></g>`;
 
@@ -977,6 +977,11 @@ const scenes = {
     // 3 遊戲 B 南瓜加碼彈出來
     const s3 = st(3), k = s3 == null ? 0 : backOut(clamp(s3 / 0.6));
     $('asb').setAttribute('transform', `translate(1110,540) scale(${k}) translate(-1110,-540)`);
+    // 南瓜從塔旁邊跳上塔頂，落地壓扁一下再晃穩
+    const j = s3 == null ? 0 : ease(clamp((s3 - 0.6) / 0.7)), d = s3 == null ? 0 : s3 - 1.3;
+    const pp = hop([1250, 540], [1110, 314], 140, j);
+    const land = d > 0 ? Math.exp(-4 * d) : 0;
+    $('asbp').setAttribute('transform', `translate(${pp[0]},${pp[1]}) rotate(${-360 * j + 12 * land * Math.sin(12 * d)}) scale(${1 + 0.15 * land},${1 - 0.25 * land})`);
   },
 
   b(t, st) {
