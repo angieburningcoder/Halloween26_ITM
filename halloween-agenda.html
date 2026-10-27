@@ -174,7 +174,22 @@ svg text{font-family:inherit}
 #dname.rolling{color:var(--ink)}
 #dsub{font-size:30px;color:var(--muted);margin-top:8px;min-height:40px}
 .wins{position:absolute;top:580px;left:160px;right:160px;display:flex;gap:30px}
-.slot{flex:1;border:3px dashed var(--purple);border-radius:24px;padding:20px 10px;text-align:center;font-size:36px;color:var(--muted)}
+.wcol{flex:1;display:flex;flex-direction:column;align-items:center}
+.wcol .hero{width:114px;height:175px;margin-top:6px;opacity:.15;transform-origin:50% 100%}
+.wcol.got .hero{opacity:1}
+.wcol.got .hero.v0{animation:popIn .5s cubic-bezier(.3,1.6,.5,1),proud 1.8s ease-in-out .5s infinite}
+.wcol.got .hero.v1{animation:popIn .5s cubic-bezier(.3,1.6,.5,1),jump 1.3s ease-in-out .5s infinite}
+.wcol.got .hero.v2{animation:popIn .5s cubic-bezier(.3,1.6,.5,1),hop2 .7s ease-in-out .5s infinite}
+.wcol.got .hero.v3{animation:popIn .5s cubic-bezier(.3,1.6,.5,1),tilt 2s ease-in-out .5s infinite}
+.wcol:not(.got) .acc{display:none}
+.hero .wave{transform-box:fill-box;transform-origin:100% 100%}
+.wcol.got .hero .wave{animation:wave .5s ease-in-out infinite alternate}
+@keyframes proud{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-8px) rotate(-3deg)}60%{transform:translateY(0) rotate(3deg)}}
+@keyframes jump{0%,100%{transform:translateY(0) scale(1,1)}12%{transform:translateY(0) scale(1.08,.9)}42%{transform:translateY(-24px) scale(.96,1.05)}70%{transform:translateY(0) scale(1.06,.94)}}
+@keyframes hop2{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes tilt{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes wave{from{transform:rotate(-26deg)}to{transform:rotate(4deg)}}
+.slot{align-self:stretch;border:3px dashed var(--purple);border-radius:24px;padding:20px 10px;text-align:center;font-size:36px;color:var(--muted)}
 .slot.got{border-style:solid;border-color:var(--orange);color:var(--ink)}
 .slot small{display:block;font-size:20px;color:var(--muted)}
 #dname.win{animation:bounce .6s}
@@ -183,6 +198,8 @@ svg text{font-family:inherit}
 .cele.on .who{animation:popIn .5s cubic-bezier(.3,1.6,.5,1) forwards}
 .cele .bit{opacity:0;transform-box:fill-box;transform-origin:center}
 .cele.on .bit{animation:spray 1.8s ease-out .35s forwards}
+.cele .drummer{transition:opacity .3s}
+.cele.on .drummer{opacity:0}
 @keyframes bounce{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
 @keyframes spray{0%{opacity:1;transform:translate(0,0) rotate(0)}55%{opacity:1;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}
@@ -401,7 +418,7 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
   </section>
 
   <!-- 抽獎（Enter 抽一位） -->
-  <section class="slide" data-steps="0" id="lotto">
+  <section class="slide" data-steps="0" id="lotto" data-scene="lotto">
     <div class="hd"><h1>抽獎｜清華小熊吊飾 × 4<small>Lucky Draw</small></h1><div class="meta">依籤數比例抽 ・ 中過不重複</div></div>
     <div class="drum"><div id="dname"></div><div id="dsub"></div></div>
     <svg class="cele" id="cele" viewBox="0 0 1600 900"></svg>
@@ -735,7 +752,18 @@ function initScenes() {
       fill="${['#FF8A1F', '#C9A6FF', '#9BE15D', '#4FC3FF', '#FF4FA3', '#F4D27A'][i % 6]}"
       style="--dx:${Math.round(Math.cos(a) * d)}px;--dy:${Math.round(Math.sin(a) * d)}px;--r:${(i * 83) % 360}deg"/>`;
   }).join('');
-  $('cele').innerHTML = `
+  // 敲鼓小人：抽的時候兩隻手輪流敲（手臂角度在 scenes.lotto 每幀更新）
+  const stick = (id, hand, tip) => `<g id="${id}"><line x1="0" y1="-80" x2="${hand[0]}" y2="${hand[1]}"/>
+    <line x1="${hand[0]}" y1="${hand[1]}" x2="${tip[0]}" y2="${tip[1]}" style="stroke:var(--pasta);stroke-width:4"/></g>`;
+  const drummer = `<g class="drummer"><g transform="translate(130,500) scale(1.4)">
+      <g id="drb"><rect x="42" y="-50" width="58" height="50" rx="6" fill="#FF8A1F" stroke="#F3E6D0" stroke-width="2.5"/>
+        <path d="M42 -44 L56 -6 L71 -44 L86 -6 L100 -44" fill="none" stroke="#F3E6D0" stroke-width="2"/>
+        <ellipse cx="71" cy="-50" rx="29" ry="8" fill="#FFF8EE" stroke="#F3E6D0" stroke-width="2.5"/></g>
+      <g class="fig"><line x1="0" y1="-93" x2="0" y2="-45"/><line x1="0" y1="-45" x2="-15" y2="0"/><line x1="0" y1="-45" x2="15" y2="0"/>
+        ${stick('drl', [22, -60], [58, -64])}${stick('drr', [26, -66], [64, -58])}<circle cx="0" cy="-110" r="17"/></g></g>
+    <text id="dong0" x="300" y="330" class="cap" style="fill:var(--pasta);font-size:40px;opacity:0">咚！</text>
+    <text id="dong1" x="220" y="290" class="cap" style="fill:var(--orange);font-size:34px;opacity:0">咚！</text></g>`;
+  $('cele').innerHTML = `${drummer}
     <g class="who"><g transform="translate(160,500) scale(1.4)">${fig(0, 0, [[0, -80, -22, -58], [0, -80, 22, -58]], 1)}${gift}</g></g>
     <g class="who"><g transform="translate(1440,500) scale(1.4)">${fig(0, 0, [[0, -80, 22, -112], [0, -80, -14, -55]], 1)}${popper}</g></g>
     ${bits}`;
@@ -835,6 +863,17 @@ const scenes = {
       $('lc' + n).textContent = v[n] === o ? '🤝 平手' : '🏆 領先';
       $('live').querySelector('.t' + n).classList.toggle('ahead', lead);
     });
+  },
+
+  lotto(t) {
+    // 抽的時候：兩手輪流敲鼓、鼓和名字框一起震、跳出「咚！」；沒在抽就拿著鼓棒待命
+    const b = t * 11, hit = rolling ? Math.sin(b) : 0;
+    $('drl').setAttribute('transform', `rotate(${rolling ? -28 * Math.max(0, hit) : -6} 0 -80)`);
+    $('drr').setAttribute('transform', `rotate(${rolling ? -28 * Math.max(0, -hit) : -6} 0 -80)`);
+    $('drb').setAttribute('transform', `translate(71,0) scale(${rolling ? 1 + 0.04 * Math.abs(hit) : 1}) translate(-71,0)`);
+    $('dong0').style.opacity = rolling && Math.sin(b) < -0.6 ? 1 : 0;
+    $('dong1').style.opacity = rolling && Math.sin(b) > 0.6 ? 1 : 0;
+    $('lotto').querySelector('.drum').style.transform = rolling ? `rotate(${Math.sin(t * 22) * 0.6}deg)` : '';
   },
 
   map(t, st) {
@@ -1105,10 +1144,40 @@ function renderLive() {
   });
 }
 
+// 得意小人：0 皇冠叉腰、1 巫師帽握拳跳、2 貓耳雙手萬歲、3 南瓜帽揮手拿棒棒糖
+function heroSvg(i) {
+  const eyes = i === 2 ? `<path d="M-10 -112 l4 -4 l4 4 M2 -112 l4 -4 l4 4" style="fill:none"/>`
+    : `<circle cx="-6" cy="-114" r="1.8" style="fill:var(--line)"/><circle cx="6" cy="-114" r="1.8" style="fill:var(--line)"/>`;
+  const legs = i === 2 ? `<line x1="0" y1="-45" x2="-22" y2="0"/><line x1="0" y1="-45" x2="22" y2="0"/>`
+    : `<line x1="0" y1="-45" x2="-16" y2="0"/><line x1="0" y1="-45" x2="16" y2="0"/>`;
+  const arms = [
+    `<line x1="0" y1="-82" x2="-24" y2="-66"/><line x1="-24" y1="-66" x2="-7" y2="-50"/><line x1="0" y1="-82" x2="24" y2="-66"/><line x1="24" y1="-66" x2="7" y2="-50"/>`,
+    `<line x1="0" y1="-82" x2="-24" y2="-66"/><line x1="-24" y1="-66" x2="-7" y2="-50"/><line x1="0" y1="-82" x2="20" y2="-104"/><line x1="20" y1="-104" x2="24" y2="-128"/><circle cx="24" cy="-131" r="5"/>`,
+    `<line x1="0" y1="-82" x2="-30" y2="-128"/><line x1="0" y1="-82" x2="30" y2="-128"/>`,
+    `<g class="wave"><line x1="0" y1="-82" x2="-28" y2="-124"/></g><line x1="0" y1="-82" x2="22" y2="-60"/>`,
+  ][i];
+  const acc = [
+    `<polygon points="-14,-126 -15,-142 -7,-134 0,-147 7,-134 15,-142 14,-126" fill="#F4D27A" stroke="#2A1236" stroke-width="1.5"/>
+     <circle cx="0" cy="-72" r="6" fill="#FF8A1F" stroke="#F4D27A" stroke-width="2"/>`,
+    `<polygon points="-12,-124 12,-124 6,-150 -10,-138" fill="#5B3A99" stroke="#F3E6D0" stroke-width="2" stroke-linejoin="round"/>
+     <ellipse cx="0" cy="-125" rx="22" ry="4" fill="#5B3A99" stroke="#F3E6D0" stroke-width="2"/><circle cx="-10" cy="-138" r="3" fill="#F4D27A"/>`,
+    `<polygon points="-16,-122 -14,-140 -4,-127" fill="#C9A6FF" stroke="#F3E6D0" stroke-width="2" stroke-linejoin="round"/>
+     <polygon points="16,-122 14,-140 4,-127" fill="#C9A6FF" stroke="#F3E6D0" stroke-width="2" stroke-linejoin="round"/>
+     <path d="M-24 -106 h10 M-24 -101 h10 M14 -106 h10 M14 -101 h10" stroke="#F3E6D0" stroke-width="1.5"/>`,
+    `<g transform="translate(0,-133)"><ellipse rx="13" ry="10" fill="#FF8A1F" stroke="#C55A00" stroke-width="2"/><path d="M0 -10 q1 -6 5 -7" stroke="#9BE15D" stroke-width="3" fill="none"/></g>
+     <line x1="22" y1="-60" x2="30" y2="-86" stroke="#F3E6D0" stroke-width="3"/><circle cx="31" cy="-92" r="9" fill="#FF4FA3" stroke="#F3E6D0" stroke-width="2"/>
+     <path d="M31 -92 m-5 0 a5 5 0 1 1 5 5" stroke="#FFF8EE" stroke-width="2" fill="none"/>`,
+  ][i];
+  return `<svg class="hero v${i}" viewBox="-52 -156 104 160"><g class="fig">
+      <line x1="0" y1="-93" x2="0" y2="-45"/>${legs}${arms}<circle cx="0" cy="-111" r="17"/>
+      <path d="M-7 -106 Q0 -99 7 -106" style="fill:none"/>${eyes}</g><g class="acc">${acc}</g></svg>`;
+}
+
 function renderWins() {
   $('wins').innerHTML = [...Array(PRIZES)].map((_, i) => {
     const n = state.drawn[i];
-    return `<div class="slot${n ? ' got' : ''}"><small>第 ${i + 1} 位</small>${n ? esc(n) : '？'}</div>`;
+    // 中獎的人底下站一個得意的小人（四個位置造型、動作都不同）；還沒抽到的位置是淡淡的影子
+    return `<div class="wcol${n ? ' got' : ''}"><div class="slot${n ? ' got' : ''}"><small>第 ${i + 1} 位</small>${n ? esc(n) : '？'}</div>${heroSvg(i)}</div>`;
   }).join('');
 }
 function lottoIdle() {
