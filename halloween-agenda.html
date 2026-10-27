@@ -42,6 +42,23 @@ html,body{margin:0;height:100%;background:#0a0614;overflow:hidden}
 .agenda .row.now{opacity:1;background:var(--orange);border-color:var(--orange);color:var(--bg)}
 .agenda .row.now .tm{color:var(--bg)}
 
+/* 遊戲預告：翻牌 */
+.tz{position:absolute;top:200px;left:60px;right:60px;display:flex;gap:30px;perspective:1800px}
+.fc{flex:1;height:500px}
+.fc[data-show]{opacity:1}
+.fc .in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,1.3,.5,1)}
+.fc.on .in{transform:rotateY(180deg)}
+.fc .bk,.fc .fr{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:28px;border:3px solid var(--purple);
+  box-sizing:border-box;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.fc .bk{background:var(--panel2)}
+.fc .bk b{font-weight:400;font-size:170px;line-height:1;color:var(--orange);text-shadow:0 0 30px #ff8a1f55}
+.fc .bk span{font-size:28px;color:var(--muted);margin-top:18px}
+.fc .fr{background:var(--panel);border-color:var(--orange);transform:rotateY(180deg)}
+.fr .tag{font-size:24px;color:var(--muted)}
+.fr svg{width:100%;height:200px;margin:12px 0}
+.fr h3{font-size:36px;font-weight:400;color:var(--orange);margin:0 0 12px}
+.fr p{font-size:28px;color:var(--green);margin:0}
+
 /* 遊戲 A 各關 */
 .round{position:absolute;top:166px;left:60px;right:60px;bottom:50px;display:flex;gap:50px}
 .stage{flex:0 0 1000px;background:var(--panel2);border:3px solid var(--purple);border-radius:28px;overflow:hidden}
@@ -49,11 +66,13 @@ html,body{margin:0;height:100%;background:#0a0614;overflow:hidden}
 .side{flex:1;display:flex;flex-direction:column;justify-content:center}
 .badge{display:flex;align-items:center;gap:14px;font-size:26px;color:var(--muted)}
 .badge b{font-weight:400;background:var(--orange);color:var(--bg);border-radius:40px;padding:6px 20px}
-.side h2{font-size:58px;margin:18px 0 0;font-weight:400;color:var(--orange)}
+.side h2{font-size:50px;margin:18px 0 0;font-weight:400;color:var(--orange)}
 .side .sub{font-size:26px;color:var(--muted)}
 .side hr{border:0;border-top:3px dashed var(--purple);margin:26px 0}
 .side p{font-size:31px;line-height:1.6;color:var(--ink);margin:0 0 8px}
 .side p.rank{color:var(--green);margin-top:14px}
+.side p.memo{color:var(--lilac)}
+.spell{font-size:36px;line-height:1.4;color:var(--orange);text-align:center;border:3px dashed var(--orange);border-radius:18px;padding:10px 16px;margin:4px 0 8px}
 
 /* 計分頁 */
 .lead{position:absolute;top:172px;left:0;right:0;text-align:center;font-size:40px;color:var(--line)}
@@ -195,10 +214,34 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
     </div>
   </section>
 
+  <!-- 遊戲預告：只露名字和一句話，不講規則 -->
+  <section class="slide" data-steps="5">
+    <div class="hd"><h1>今天的挑戰<small>Coming Up</small></h1><div class="meta">遊戲 A 三關 ＋ 遊戲 B</div></div>
+    <div class="tz">
+      <div class="fc" data-show="1"><div class="in"><div class="bk"><b>？</b><span>遊戲 A-1</span></div>
+        <div class="fr"><div class="tag">遊戲 A-1</div><svg id="tz1" viewBox="0 0 300 200"></svg><h3>免洗筷夾南瓜</h3><p>筷子功夫考驗</p></div></div></div>
+      <div class="fc" data-show="2"><div class="in"><div class="bk"><b>？</b><span>遊戲 A-2</span></div>
+        <div class="fr"><div class="tag">遊戲 A-2</div><svg id="tz2" viewBox="0 0 300 200"></svg><h3>倒立巫師帽接南瓜</h3><p>接不接得住？</p></div></div></div>
+      <div class="fc" data-show="3"><div class="in"><div class="bk"><b>？</b><span>遊戲 A-3</span></div>
+        <div class="fr"><div class="tag">遊戲 A-3</div><svg id="tz3" viewBox="0 0 300 200"></svg><h3>骷髏手運南瓜接力</h3><p>最後還要唸咒語…</p></div></div></div>
+      <div class="fc" data-show="4"><div class="in"><div class="bk"><b>？</b><span>遊戲 B</span></div>
+        <div class="fr"><div class="tag">遊戲 B</div><svg id="tz4" viewBox="0 0 300 200"></svg><h3>先別急著吃棉花糖</h3><p>蓋得越高越好</p></div></div></div>
+    </div>
+    <div class="note" data-show="5">每個挑戰都能<em>拿籤</em> → 下一頁告訴你怎麼拿</div>
+  </section>
+
+  <!-- 計分：遊戲 A、B 同一套 -->
+  <section class="slide" data-steps="3" data-scene="as">
+    <div class="hd"><h1>怎麼拿籤<small>Tickets</small></h1><div class="meta">遊戲 A 三關 ＋ 遊戲 B 都一樣</div></div>
+    <div class="lead"><em>每一關</em>都算：贏的組每人 +2、輸的組每人 +1</div>
+    <svg class="score-svg" id="as" viewBox="0 0 1480 560"></svg>
+    <div class="note">全部加總 → 每人 <em>4～10 籤</em>，籤越多，抽獎機會越高</div>
+  </section>
+
   <!-- 獎品介紹（開場就先講） -->
   <section class="slide" data-steps="3">
     <div class="hd"><h1>今天的獎品<small>Prizes</small></h1><div class="meta">13:15–13:30 頒獎＋抽獎</div></div>
-    <div class="lead">遊戲 A 三關＋遊戲 B，每關<em>贏 +2、輸 +1</em>，全部加總 → 每人 4～8 籤</div>
+    <div class="lead">每人 <em>4～10 籤</em>，籤越多，抽中大獎的機會越高</div>
     <div class="awards">
       <div class="aw" data-show="1"><div class="pic"><img src="img/bear.png" alt="清華小熊"></div><div class="t">抽獎大獎</div><div class="p">清華小熊吊飾 × 4</div><div class="d">籤越多，機會越高</div></div>
       <div class="aw" data-show="2"><div class="pic"><img src="img/panda-mug.png" alt="熊貓馬克杯" style="transform:translateX(21px)"></div><div class="t">最佳扮裝</div><div class="p">熊貓馬克杯 × 3</div><div class="d">票數前三名各一個</div></div>
@@ -257,8 +300,9 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
         <div class="sub">Chopstick Pass</div>
         <hr>
         <p>7 人一排連線作戰</p>
-        <p>用免洗筷把 20 顆南瓜球接力夾進對面的碗</p>
-        <p class="rank">→ 先夾完 20 顆的組贏這關</p>
+        <p>用免洗筷接力，把 10 顆南瓜運到終點</p>
+        <p>南瓜掉地上 → 從起點重來</p>
+        <p class="rank">→ 先運完 10 顆的組贏這關</p>
       </div>
     </div>
   </section>
@@ -269,60 +313,57 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
     <div class="round">
       <div class="stage"><svg id="a2" viewBox="0 0 1000 674"></svg></div>
       <div class="side">
-        <div class="badge"><b>第 2 關 / 3</b>3 人 ・ 最多 5 分鐘</div>
-        <h2>倒立巫師帽接球</h2>
+        <div class="badge"><b>第 2 關 / 3</b>3 人 ・ 計時 3 分鐘</div>
+        <h2>倒立巫師帽接南瓜</h2>
         <div class="sub">Wizard Hat Catch</div>
         <hr>
-        <p>一人背對隊友，往後丟南瓜球</p>
-        <p>兩位隊友抱著倒立的巫師帽，在範圍內移動接球</p>
-        <p class="rank">→ 先接滿 20 顆的組贏這關</p>
+        <p>丟的人背對隊友</p>
+        <p>用非慣用手拿骷髏手丟</p>
+        <p>接的人雙手不能離開帽子</p>
+        <p>隔壁組丟的也能接！</p>
+        <p class="memo">※ 南瓜組員自己撿、自己整理</p>
+        <p class="rank">→ 3 分鐘內接最多的組贏</p>
       </div>
     </div>
   </section>
 
   <!-- 5 遊戲 A 第 3 關 -->
   <section class="slide" data-steps="0" data-scene="a3">
-    <div class="hd"><h1>遊戲 A｜南瓜鐵人三項<small>Pumpkin Triathlon</small></h1><div class="meta">兩組同時比 ・ 每組 16 人 ・ 三關車輪戰</div></div>
+    <div class="hd"><h1>遊戲 A｜南瓜鐵人三項<small>Pumpkin Triathlon</small></h1><div class="meta">兩組輪流計時 ・ 每組 16 人 ・ 三關車輪戰</div></div>
     <div class="round">
       <div class="stage"><svg id="a3" viewBox="0 0 1000 674"></svg></div>
       <div class="side">
-        <div class="badge"><b>第 3 關 / 3</b>6 人 ・ 最多 5 分鐘</div>
-        <h2>湯匙運南瓜接力</h2>
-        <div class="sub">Spoon Relay</div>
+        <div class="badge"><b>第 3 關 / 3</b>6 人 ・ 輪流計時</div>
+        <h2>骷髏手運南瓜接力</h2>
+        <div class="sub">Skeleton Hand Relay</div>
         <hr>
-        <p>A、B 兩邊各站 3 人</p>
-        <p>用湯匙運南瓜球跑到對面，交給下一位，再排到隊伍最後</p>
-        <p class="rank">→ 先運完 20 顆的組贏這關</p>
+        <p>A、B 兩邊各 3 人，用骷髏手運球交棒</p>
+        <p>球掉了 → 這棒回原點重來</p>
+        <p class="memo">最後一棒舉手唸咒語才停表：</p>
+        <div class="spell">霹靂卡霹靂拉拉<br>波波莉娜貝貝魯多</div>
+        <p class="rank">→ 時間最短的組贏</p>
       </div>
     </div>
   </section>
 
-  <!-- 6 遊戲 A 計分 -->
-  <section class="slide" data-steps="2" data-scene="as">
-    <div class="hd"><h1>遊戲 A｜怎麼算籤<small>Scoring</small></h1><div class="meta">每關最多 5 分鐘，提早完成就喊停</div></div>
-    <div class="lead"><em>每一關</em>都算：先完成的組贏這關，兩組都有加籤</div>
-    <svg class="score-svg" id="as" viewBox="0 0 1480 560"></svg>
-    <div class="note">遊戲 A 三關＋遊戲 B 的籤<em>全部加總</em>，就是每個人的抽獎籤數</div>
-  </section>
-
   <!-- 7 遊戲 B -->
   <section class="slide" data-steps="4" data-scene="b">
-    <div class="hd"><h1>遊戲 B｜先別急著吃棉花糖</h1><div class="meta">兩組同時比 ・ 全員下場 ・ 限時 15 分鐘</div></div>
+    <div class="hd"><h1>遊戲 B｜先別急著吃棉花糖</h1><div class="meta">兩組同時比 ・ 全員下場 ・ 限時 8 分鐘</div></div>
     <div class="cards">
       <div class="card" data-show="1"><h3><span class="num">1</span>拿材料</h3><div class="pn"><svg id="b1" viewBox="0 0 340 320"></svg></div>
         <p>每組拿到：生義大利麵、棉花糖、塑膠小南瓜</p></div>
       <div class="card" data-show="2"><h3><span class="num">2</span>合力蓋塔</h3><div class="pn"><svg id="b2" viewBox="0 0 340 320"></svg></div>
-        <p>全組一起用麵條＋棉花糖蓋高塔</p></div>
-      <div class="card" data-show="3"><h3><span class="num">3</span>南瓜放塔頂</h3><div class="pn"><svg id="b3" viewBox="0 0 340 320"></svg></div>
-        <p>塔頂放上小南瓜，要放穩才算數</p></div>
-      <div class="card" data-show="4"><h3><span class="num">4</span>時間到比高度</h3><div class="pn"><svg id="b4" viewBox="0 0 340 320"></svg></div>
-        <p>15 分鐘一到，塔比較高的組贏：贏 +2、另一組 +1 籤</p></div>
+        <p>全組一起用麵條＋棉花糖，8 分鐘內蓋高塔</p></div>
+      <div class="card" data-show="3"><h3><span class="num">3</span>時間到比高度</h3><div class="pn"><svg id="b4" viewBox="0 0 340 320"></svg></div>
+        <p>量塔高，比較高的組贏：贏 +2、輸 +1 籤</p></div>
+      <div class="card" data-show="4"><h3><span class="num">4</span>放南瓜加碼</h3><div class="pn"><svg id="b3" viewBox="0 0 340 320"></svg></div>
+        <p>南瓜撐得住，全組再 +2 籤<br>（跟高度輸贏無關）</p></div>
     </div>
   </section>
 
   <!-- 比分揭曉：兩個遊戲都結束後才顯示（資料來自計分台） -->
   <section class="slide" data-steps="0" id="live">
-    <div class="hd"><h1>比分揭曉<small>Final Score</small></h1><div class="meta">每關 贏 +2 ・ 輸 +1（全組每人）</div></div>
+    <div class="hd"><h1>比分揭曉<small>Final Score</small></h1><div class="meta">每關 贏 +2 ・ 輸 +1 ・ 南瓜撐住 +2（全組每人）</div></div>
     <div class="teams">
       <div class="team t1"><div class="tn">第 1 組</div><div class="big"><span id="ls1">0</span>籤 / 人</div><div class="rounds" id="lr1"></div><div class="mem" id="lm1"></div></div>
       <div class="team t2"><div class="tn">第 2 組</div><div class="big"><span id="ls2">0</span>籤 / 人</div><div class="rounds" id="lr2"></div><div class="mem" id="lm2"></div></div>
@@ -443,6 +484,28 @@ function initScenes() {
     <path d="M0 900 L0 820 Q200 780 400 830 T800 815 T1200 830 T1600 800 L1600 900 Z" fill="#120B22"/>`;
   $('cvp').innerHTML = pumpkin(0, 15, 80, true);
 
+  // 遊戲預告：四張卡片正面的小圖
+  $('tz1').innerHTML = `
+    <g style="stroke:var(--pasta);stroke-width:7;stroke-linecap:round"><line x1="60" y1="30" x2="166" y2="116"/><line x1="88" y1="20" x2="176" y2="106"/></g>
+    <circle class="ball" cx="180" cy="122" r="16"/>
+    ${bowl(240, 190, 90, 34)}<circle class="ball" cx="228" cy="154" r="11"/><circle class="ball" cx="250" cy="150" r="11"/>`;
+  $('tz2').innerHTML = `
+    <path class="guide" d="M30 170 Q80 0 138 34"/>
+    <circle class="ball" cx="150" cy="40" r="16"/>
+    <polygon class="hat" points="88,104 212,104 150,190"/><ellipse class="hat" cx="150" cy="104" rx="66" ry="12"/>`;
+  $('tz3').innerHTML = `
+    <circle class="ball" cx="152" cy="84" r="22"/>
+    <g style="stroke:var(--line);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none">
+      <line x1="34" y1="178" x2="118" y2="126"/><line x1="46" y1="190" x2="126" y2="138"/>
+      <path d="M116 122 Q150 108 182 120 L176 146 Q150 154 124 146 Z" style="fill:var(--panel2)"/>
+      <polyline points="122,120 112,98 108,76"/><polyline points="140,112 134,90 132,68"/>
+      <polyline points="162,110 166,88 168,68"/><polyline points="180,120 192,100 198,82"/>
+    </g>
+    <g style="fill:var(--line)"><circle cx="112" cy="98" r="5"/><circle cx="134" cy="90" r="5"/><circle cx="166" cy="88" r="5"/><circle cx="192" cy="100" r="5"/></g>
+    <text x="236" y="70" style="font-size:34px;fill:var(--lilac)">✦</text><text x="60" y="64" style="font-size:24px;fill:var(--green)">✦</text>
+    <text x="250" y="140" style="font-size:22px;fill:var(--orange)">✦</text>`;
+  $('tz4').innerHTML = `${ground(60, 240, 190)}${tower(150, 190, 120, 140)}${pumpkin(150, 190 - 140 - 6 - 16, 16)}`;
+
   // A1 免洗筷夾南瓜（7 人）
   const guide = A1P.slice(0, -1).map((p, i) => {
     const q = A1P[i + 1], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2 - 2 * 60;
@@ -450,7 +513,7 @@ function initScenes() {
   }).join(' ');
   const chop = [[0, -80, 36, -66], [0, -80, 30, -60], [28, -70, 66, -62], [28, -63, 66, -58]];
   $('a1').innerHTML = `
-    <text class="cap" x="500" y="95">7 個人用免洗筷，把南瓜球一路夾到對面的碗</text>
+    <text class="cap" x="500" y="95">7 個人用免洗筷，把南瓜一路夾到對面的碗</text>
     <path class="guide" d="${guide}"/>
     ${ground(20, 980, G)}
     <circle class="ball" cx="50" cy="516" r="13"/><circle class="ball" cx="70" cy="508" r="13"/><circle class="ball" cx="90" cy="516" r="13"/>
@@ -477,7 +540,7 @@ function initScenes() {
     <circle id="a2b" class="ball" r="13"/>
     <text id="a2n" class="cnt" x="970" y="60"></text>`;
 
-  // A3 湯匙接力（兩邊各 3 人）
+  // A3 骷髏手接力（兩邊各 3 人）
   const flag = (x, d, t) => `<line class="ground" x1="${x}" y1="${G}" x2="${x}" y2="${G - 200}" style="stroke:var(--line)"/>
     <polygon class="flag" points="${x},${G - 200} ${x + 70 * d},${G - 176} ${x},${G - 152}"/>
     <text class="cap" x="${x}" y="${G - 220}">${t}</text>`;
@@ -486,13 +549,14 @@ function initScenes() {
       <line x1="0" y1="-93" x2="0" y2="-45"/>
       <line id="rl${i}a" x1="0" y1="-45" x2="-15" y2="0"/><line id="rl${i}b" x1="0" y1="-45" x2="15" y2="0"/>
       <line x1="0" y1="-80" x2="-10" y2="-58"/><line x1="0" y1="-80" x2="30" y2="-70"/>
-      <line x1="28" y1="-70" x2="46" y2="-75"/><ellipse cx="51" cy="-76" rx="7" ry="3.5"/>
+      <line x1="28" y1="-70" x2="44" y2="-75"/><line x1="42" y1="-76" x2="60" y2="-77"/>
+      <line x1="43" y1="-76" x2="40" y2="-87"/><line x1="60" y1="-77" x2="63" y2="-88"/>
       <circle id="rb${i}" class="ball" cx="51" cy="-85" r="8"/>
       <circle cx="0" cy="-110" r="17"/></g></g>`;
   $('a3').innerHTML = `
     <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 Z" fill="#8A5CD6"/></marker></defs>
-    <text class="cap" x="500" y="95">A、B 各 3 人，用湯匙運南瓜球來回接力</text>
+    <text class="cap" x="500" y="95">A、B 各 3 人，用骷髏手運球來回接力</text>
     <line x1="390" y1="140" x2="610" y2="140" stroke="#8A5CD6" stroke-width="4" marker-end="url(#ah)"/>
     <line x1="390" y1="175" x2="610" y2="175" stroke="#8A5CD6" stroke-width="4" marker-start="url(#ah)"/>
     ${ground(20, 980, G)}
@@ -501,10 +565,13 @@ function initScenes() {
     <text id="a3n" class="cnt" x="970" y="60"></text>`;
 
   // A 計分頒獎台（兩組）
-  $('as').innerHTML = ground(300, 1180, 540) + PODIUM.map((p, i) => `
+  $('as').innerHTML = ground(140, 1340, 540) + PODIUM.map((p, i) => `
     <rect id="pd${i}" class="bowl" x="${p.x}" width="300" rx="10" style="fill:var(--panel)"/>
     <text id="pr${i}" class="cap" x="${p.x + 150}" style="font-size:52px">${p.r}</text>
-    <text id="pl${i}" class="cap" x="${p.x + 150}" style="fill:var(--orange);font-size:40px">+${p.t} 張籤 / 人</text>`).join('');
+    <text id="pl${i}" class="cap" x="${p.x + 150}" style="fill:var(--orange);font-size:40px">+${p.t} 張籤 / 人</text>`).join('') + `
+    <g id="asb">${tower(1110, 540, 150, 220)}${pumpkin(1110, 540 - 220 - 6 - 24, 24)}
+      <text class="cap" x="1110" y="160" style="fill:var(--green)">遊戲 B 加碼：南瓜撐住</text>
+      <text class="cap" x="1110" y="216" style="fill:var(--orange);font-size:40px">全組再 +2 張籤 / 人</text></g>`;
 
   // B1 材料
   let sp = ''; for (let x = 52; x <= 100; x += 7) sp += `<line x1="${x}" y1="120" x2="${x}" y2="250"/>`;
@@ -526,7 +593,7 @@ function initScenes() {
   // B3 南瓜放塔頂
   $('b3').innerHTML = `${ground(10, 330, 290)}${tower(170, 290, 130, 170)}
     <g id="b3p">${pumpkin(0, 0, 20)}</g>
-    <text id="b3t" class="lbl" x="268" y="88" style="fill:var(--green);font-size:26px">穩住了！</text>`;
+    <text id="b3t" class="lbl" x="262" y="88" style="fill:var(--green);font-size:26px">撐住 +2！</text>`;
 
   // B4 比高度（右側量尺）
   let ru = `<line class="ground" x1="326" y1="290" x2="326" y2="60"/>`;
@@ -603,8 +670,8 @@ function layoutGrp() {
 }
 
 const PODIUM = [
-  { x: 420, h: 170, r: '輸這關', t: 1, step: 1 },
-  { x: 760, h: 290, r: '贏這關 🏆', t: 2, step: 2 },
+  { x: 200, h: 170, r: '輸這關', t: 1, step: 1 },
+  { x: 540, h: 290, r: '贏這關 🏆', t: 2, step: 2 },
 ];
 const B4T = [{ cx: 100, h: 120, r: '+1' }, { cx: 225, h: 200, r: '贏 +2' }];
 
@@ -635,8 +702,8 @@ const scenes = {
     const p = l < F ? hop(A1P[seg], A1P[seg + 1], 60, ease(l / F)) : A1P[seg + 1];
     b.setAttribute('cx', p[0]); b.setAttribute('cy', p[1]);
     b.style.opacity = (seg === N - 1 && l >= F) ? 0 : 1;
-    const n = Math.min(20, Math.floor(t / T) + (u >= (N - 1) * H + F ? 1 : 0));
-    $('a1n').textContent = `🎃 ${n} / 20`;
+    const n = Math.min(10, Math.floor(t / T) + (u >= (N - 1) * H + F ? 1 : 0));
+    $('a1n').textContent = `🎃 ${n} / 10`;
     const got = Math.min(n, 3), g = $('a1got');
     if (g.dataset.n != got) {
       g.dataset.n = got;
@@ -654,7 +721,7 @@ const scenes = {
     else p = A2HAND;
     const b = $('a2b');
     b.setAttribute('cx', p[0]); b.setAttribute('cy', p[1]);
-    $('a2n').textContent = `🎃 ${Math.min(20, Math.floor(t / T) + (u >= F ? 1 : 0))} / 20`;
+    $('a2n').textContent = `🎃 ${Math.floor(t / T) + (u >= F ? 1 : 0)}`;
   },
 
   a3(t) {
@@ -692,7 +759,7 @@ const scenes = {
       $(`rb${i}`).style.display = p.ball ? '' : 'none';
       mv($('rp' + i), p.x, G - (moving ? Math.abs(sw) * 5 : 0), ` scale(${dir},1)`);
     });
-    $('a3n').textContent = `🎃 ${Math.min(20, R.n)} / 20`;
+    $('a3n').textContent = `⏱ ${Math.floor(t)} 秒`;
   },
 
   vote(t) {
@@ -745,6 +812,9 @@ const scenes = {
       const tr = $('pr' + i); tr.setAttribute('y', 540 - h / 2 + 18); tr.style.opacity = k;
       const tl = $('pl' + i); tl.setAttribute('y', 540 - h - 26); tl.style.opacity = s == null ? 0 : clamp((s - 0.6) / 0.4);
     });
+    // 3 遊戲 B 南瓜加碼彈出來
+    const s3 = st(3), k = s3 == null ? 0 : backOut(clamp(s3 / 0.6));
+    $('asb').setAttribute('transform', `translate(1110,540) scale(${k}) translate(-1110,-540)`);
   },
 
   b(t, st) {
@@ -757,8 +827,8 @@ const scenes = {
     // 2 一根根蓋起來（每 5 秒重播）
     const s2 = st(2);
     if (s2 != null) $('b2t').innerHTML = tower(170, 290, 130, 190, clamp((s2 % 5) / 3));
-    // 3 南瓜掉到塔頂、晃一晃、穩住
-    const s3 = st(3), top = 290 - 170 - 6 - 20;
+    // 4 南瓜掉到塔頂、晃一晃、穩住
+    const s3 = st(4), top = 290 - 170 - 6 - 20;
     if (s3 != null) {
       const c = s3 % 5;
       let y = top, rot = 0;
@@ -767,13 +837,13 @@ const scenes = {
       $('b3p').setAttribute('transform', `translate(170,${y}) rotate(${rot} 0 20)`);
       $('b3t').style.opacity = clamp((c - 1.6) / 0.3);
     } else $('b3p').setAttribute('transform', 'translate(170,-60)');
-    // 4 兩座塔長高、比高度
-    const s4 = st(4);
+    // 3 兩座塔長高、比高度
+    const s4 = st(3);
     if (s4 != null) {
       const k = easeOut(clamp(s4 / 1.5)), lo = clamp((s4 - 1.5) / 0.4);
       $('b4t').innerHTML = B4T.map(b => {
         const h = b.h * k;
-        return tower(b.cx, 290, 90, h, 1, 11) + pumpkin(b.cx, 290 - h - 19, 14) +
+        return tower(b.cx, 290, 90, h, 1, 11) +
           `<text class="lbl" x="${b.cx}" y="${290 - b.h - 46}" style="opacity:${lo};fill:var(--orange)">${b.r}</text>`;
       }).join('');
     }
@@ -782,10 +852,10 @@ const scenes = {
 
 /* ---------- 計分資料（存在瀏覽器 localStorage） ---------- */
 const ROSTER = ROSTER_LIST.map(([name, year]) => ({ name, year }));
-const ROUNDS = ['A-1 筷子', 'A-2 帽子', 'A-3 湯匙', 'B 高塔'];
+const ROUNDS = ['A-1 筷子', 'A-2 帽子', 'A-3 骷髏手', 'B 高塔'];
 const TC = { 1: '#FF8A1F', 2: '#C9A6FF' };
 const PRIZES = 4, KEY = 'halloween26-score';
-const empty = () => ({ team: {}, result: [0, 0, 0, 0], drawn: [] });
+const empty = () => ({ team: {}, result: [0, 0, 0, 0], bonus: {}, drawn: [] });
 let state = empty(), canSave = true;
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s) state = { ...state, ...s }; } catch (e) { canSave = false; }
 // 儲存有問題時，計分台最上面顯示提醒
@@ -799,7 +869,9 @@ function save() {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // 某組在第 i 關每人拿到幾籤（還沒比 = 0）
 const roundPts = (t, i) => !t || !state.result[i] ? 0 : state.result[i] === t ? 2 : 1;
-const teamPer = t => ROUNDS.reduce((s, _, i) => s + roundPts(t, i), 0);
+// 遊戲 B 塔頂南瓜撐住：全組每人再 +2（跟高度輸贏無關）
+const bonusPts = t => t && state.bonus[t] ? 2 : 0;
+const teamPer = t => ROUNDS.reduce((s, _, i) => s + roundPts(t, i), 0) + bonusPts(t);
 const tickets = p => teamPer(state.team[p.name]);
 const members = t => ROSTER.filter(p => state.team[p.name] === t);
 
@@ -819,7 +891,9 @@ function renderPanel() {
   } else if (ptab === 'score') {
     body.innerHTML = ROUNDS.map((r, i) => `<div class="srow"><span class="lab">${r}</span>${[1, 2].map(t =>
         `<button class="btn t${t}${state.result[i] === t ? ' sel' : ''}" data-act="win" data-v="${i},${t}">第 ${t} 組贏</button>`).join('')}</div>`).join('') +
-      `<div class="srow"><span class="lab">目前每人籤數</span>${[1, 2].map(t => `<span style="color:${TC[t]}">第 ${t} 組：${teamPer(t)} 籤</span>`).join('　')}</div>
+      `<div class="srow"><span class="lab">B 南瓜撐住 +2</span>${[1, 2].map(t =>
+        `<button class="btn t${t}${state.bonus[t] ? ' sel' : ''}" data-act="bonus" data-v="${t}">第 ${t} 組撐住</button>`).join('')}</div>
+      <div class="srow"><span class="lab">目前每人籤數</span>${[1, 2].map(t => `<span style="color:${TC[t]}">第 ${t} 組：${teamPer(t)} 籤</span>`).join('　')}</div>
       <div class="pinfo" style="margin-top:16px">按錯直接按另一組；再按一次已選的按鈕可以取消該關結果</div>
       <div class="tools"><button class="btn" data-act="goto" data-v="live">→ 到比分揭曉頁</button><button class="btn" data-act="goto" data-v="lotto">→ 到抽獎頁</button></div>`;
   } else {
@@ -827,9 +901,9 @@ function renderPanel() {
     body.innerHTML = `<div class="tools">
         <button class="btn" data-act="csv">匯出 CSV</button><button class="btn" data-act="json">匯出備份</button><button class="btn" data-act="import">匯入備份</button>
         <button class="btn" data-act="resetDraw">重設抽獎</button><button class="btn" data-act="resetAll">全部重設</button></div>
-      <table class="stat"><tr><th>姓名</th><th>年級</th><th>組別</th>${ROUNDS.map(r => `<th>${r}</th>`).join('')}<th>合計</th><th>中獎</th></tr>
+      <table class="stat"><tr><th>姓名</th><th>年級</th><th>組別</th>${ROUNDS.map(r => `<th>${r}</th>`).join('')}<th>南瓜</th><th>合計</th><th>中獎</th></tr>
       ${rows.map(p => { const t = state.team[p.name]; return `<tr><td>${esc(p.name)}</td><td>${p.year}</td>
-        <td style="color:${TC[t] || 'inherit'}">${t ? `第 ${t} 組` : '—'}</td>${ROUNDS.map((_, i) => `<td>${roundPts(t, i) || ''}</td>`).join('')}
+        <td style="color:${TC[t] || 'inherit'}">${t ? `第 ${t} 組` : '—'}</td>${ROUNDS.map((_, i) => `<td>${roundPts(t, i) || ''}</td>`).join('')}<td>${bonusPts(t) || ''}</td>
         <td style="color:var(--orange)">${tickets(p)}</td><td>${state.drawn.includes(p.name) ? '🎁' : ''}</td></tr>`; }).join('')}</table>`;
   }
 }
@@ -841,7 +915,7 @@ function renderLive() {
     $('lr' + t).innerHTML = ROUNDS.map((r, i) => {
       const w = state.result[i];
       return `<div class="rd ${!w ? '' : w === t ? 'win' : 'lose'}">${r}<b>${!w ? '—' : w === t ? '贏 +2' : '輸 +1'}</b></div>`;
-    }).join('');
+    }).join('') + `<div class="rd ${state.bonus[t] ? 'win' : ''}">南瓜加碼<b>${state.bonus[t] ? '+2' : '—'}</b></div>`;
     $('lm' + t).innerHTML = members(t).map(p => esc(p.name)).join('<br>') || '<span style="color:var(--muted)">現場分組後，這裡會列出組員</span>';
   });
 }
@@ -894,9 +968,9 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function exportCSV() {
-  const head = ['姓名', '年級', '組別', ...ROUNDS, '合計', '中獎'];
+  const head = ['姓名', '年級', '組別', ...ROUNDS, 'B 南瓜', '合計', '中獎'];
   const rows = ROSTER.map(p => { const t = state.team[p.name];
-    return [p.name, p.year, t || '', ...ROUNDS.map((_, i) => roundPts(t, i)), tickets(p), state.drawn.includes(p.name) ? 'Y' : '']; });
+    return [p.name, p.year, t || '', ...ROUNDS.map((_, i) => roundPts(t, i)), bonusPts(t), tickets(p), state.drawn.includes(p.name) ? 'Y' : '']; });
   const csv = [head, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
   download('halloween26-score.csv', '﻿' + csv, 'text/csv');
 }
@@ -914,6 +988,7 @@ panel.addEventListener('click', e => {
   if (a === 'tab') { ptab = v; renderPanel(); }
   else if (a === 'close') togglePanel(false);
   else if (a === 'chip') { const t = ((state.team[v] || 0) + 1) % 3; if (t) state.team[v] = t; else delete state.team[v]; save(); }
+  else if (a === 'bonus') { state.bonus = { ...state.bonus, [v]: !state.bonus[v] }; save(); }
   else if (a === 'win') { const [i, t] = v.split(',').map(Number); state.result[i] = state.result[i] === t ? 0 : t; save(); }
   else if (a === 'goto') { togglePanel(false); go(slides.indexOf($(v))); }
   else if (a === 'csv') exportCSV();
