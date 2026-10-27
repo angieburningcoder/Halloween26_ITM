@@ -152,11 +152,17 @@ svg text{font-family:inherit}
 .tn{font-size:44px}
 .t1 .tn{color:var(--orange)}
 .t2 .tn{color:var(--lilac)}
-.big{font-size:36px;color:var(--muted)}
-.big span{font-size:120px;color:var(--ink);margin-right:10px}
+.big{position:relative;font-size:40px;color:var(--muted);display:flex;align-items:baseline;gap:16px;margin:4px 0 10px}
+.big span{font-size:180px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.crown{font-size:30px;margin-left:18px;padding:4px 20px;border-radius:30px;background:var(--pasta);color:var(--bg);vertical-align:middle;display:none}
+.team.ahead .crown{display:inline-block;animation:popIn .5s cubic-bezier(.3,1.6,.5,1)}
+.team.ahead{box-shadow:0 0 70px #F4D27A44}
+.team.ahead .big span{color:var(--pasta);animation:glow 1.6s ease-in-out infinite}
+.team.ahead .spk{animation:twinkle 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{text-shadow:0 0 24px #F4D27A66}50%{text-shadow:0 0 60px #F4D27Acc}}
 .rounds{display:flex;gap:12px;margin:6px 0 16px}
-.rd{flex:1;text-align:center;border-radius:14px;padding:8px 0;font-size:20px;background:var(--panel2);color:var(--muted)}
-.rd b{display:block;font-weight:400;font-size:28px}
+.rd{flex:1;text-align:center;border-radius:14px;padding:10px 0;font-size:20px;background:var(--panel2);color:var(--muted)}
+.rd b{display:block;font-weight:400;font-size:38px;line-height:1.2}
 .rd.win{background:var(--green);color:var(--bg)}
 .rd.lose{color:var(--ink)}
 .mem{columns:2;font-size:22px;line-height:1.5;border-top:3px dashed var(--purple);padding-top:12px}
@@ -386,11 +392,11 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
   </section>
 
   <!-- 比分揭曉：兩個遊戲都結束後才顯示（資料來自計分台） -->
-  <section class="slide" data-steps="0" id="live">
+  <section class="slide" data-steps="0" id="live" data-scene="live">
     <div class="hd"><h1>比分揭曉<small>Final Score</small></h1><div class="meta">每關 贏 +2 ・ 輸 +1 ・ 南瓜撐住 +2（全組每人）</div></div>
     <div class="teams">
-      <div class="team t1"><div class="tn">第 1 組</div><div class="big"><span id="ls1">0</span>籤 / 人</div><div class="rounds" id="lr1"></div><div class="mem" id="lm1"></div></div>
-      <div class="team t2"><div class="tn">第 2 組</div><div class="big"><span id="ls2">0</span>籤 / 人</div><div class="rounds" id="lr2"></div><div class="mem" id="lm2"></div></div>
+      <div class="team t1"><div class="tn">第 1 組<b class="crown" id="lc1"></b></div><div class="big"><span id="ls1">0</span>籤 / 人<i class="spk" style="left:-6px;top:4px;animation-delay:0s">✦</i><i class="spk" style="left:150px;top:-10px;animation-delay:0.4s">✦</i><i class="spk" style="left:118px;top:150px;animation-delay:0.8s">✦</i><i class="spk" style="left:200px;top:70px;animation-delay:1.2s">✦</i></div><div class="rounds" id="lr1"></div><div class="mem" id="lm1"></div></div>
+      <div class="team t2"><div class="tn">第 2 組<b class="crown" id="lc2"></b></div><div class="big"><span id="ls2">0</span>籤 / 人<i class="spk" style="left:-6px;top:4px;animation-delay:0s">✦</i><i class="spk" style="left:150px;top:-10px;animation-delay:0.4s">✦</i><i class="spk" style="left:118px;top:150px;animation-delay:0.8s">✦</i><i class="spk" style="left:200px;top:70px;animation-delay:1.2s">✦</i></div><div class="rounds" id="lr2"></div><div class="mem" id="lm2"></div></div>
     </div>
   </section>
 
@@ -817,6 +823,18 @@ const scenes = {
     if (u4 < 2) y4 = -40; else if (u4 < 2.5) y4 = lerp(-40, top4, Math.pow((u4 - 2) / 0.5, 2));
     else { const d = u4 - 2.5; r4 = 14 * Math.exp(-3 * d) * Math.sin(10 * d); }
     $('tz4p').setAttribute('transform', `translate(150,${y4}) rotate(${r4} 0 16)`);
+  },
+
+  live(t) {
+    // 各關結果依序彈出 → 籤數從 0 跳到總數 → 領先的組發光、戴上獎盃
+    const v = [0, teamPer(1), teamPer(2)], done = t > 2.1;
+    [1, 2].forEach(n => {
+      [...$('lr' + n).children].forEach((c, i) => { const k = backOut(clamp((t - 0.1 - i * 0.12) / 0.4)); c.style.opacity = clamp(k); c.style.transform = `scale(${k})`; });
+      $('ls' + n).textContent = Math.round(v[n] * easeOut(clamp((t - 0.7) / 1.3)));
+      const o = v[3 - n], lead = done && v[n] > 0 && v[n] >= o;
+      $('lc' + n).textContent = v[n] === o ? '🤝 平手' : '🏆 領先';
+      $('live').querySelector('.t' + n).classList.toggle('ahead', lead);
+    });
   },
 
   map(t, st) {
