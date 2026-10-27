@@ -541,7 +541,7 @@ function initScenes() {
     <circle id="vs" r="11" stroke="#fff" stroke-width="2"/>`;
 
   // 現場分組：32 人 → 兩組各 16 人
-  $('grp').innerHTML = GRP.map((_, i) => `<g id="gp${i}">${fig(0, 0, [[0, -80, -14, -55], [0, -80, 14, -55]], 0.6)}</g>`).join('') +
+  $('grp').innerHTML = GRP.map((_, i) => `<g id="gp${i}">${fig(0, 0, [[0, -80, -14, -55], [0, -80, 14, -55]], 0.6)}<text class="lbl" y="26">${esc(ROSTER[i].name)}</text></g>`).join('') +
     GTEAM.map((t, i) => `<text id="gl${i}" class="cap" x="${t.cx}" y="70" style="font-size:${i < 2 ? 44 : 30}px;fill:${t.color || 'var(--muted)'}"></text>`).join('');
 }
 
@@ -567,6 +567,10 @@ function layoutGrp() {
     ids.forEach((i, k) => {
       GRP[i].team = ti;
       GRP[i].to = [t.cx - 150 + (k % cols) * gap, 200 + Math.floor(k / cols) * 115];
+      // 名字跟組別同色；小人排太密時字縮小，避免名字疊在一起
+      const n = $('gp' + i).lastChild;
+      n.style.fill = t.color || '';
+      n.style.fontSize = Math.min(24, gap / 2.8) + 'px';
     });
     $('gl' + ti).textContent = (ti < 2 ? `第 ${ti + 1} 組` : '尚未分組') + ` ・ ${ids.length} 人`;
     $('gl' + ti).dataset.n = ids.length;
@@ -701,6 +705,7 @@ const scenes = {
       const el = $('gp' + i);
       mv(el, p[0], p[1] - Math.sin(Math.PI * k) * 30 + (s == null ? Math.sin(t * 3 + i) * 3 : 0));
       el.firstChild.style.stroke = k > 0.5 ? GTEAM[g.team].color : '';
+      el.lastChild.style.opacity = clamp((k - 0.85) / 0.15);
     });
     GTEAM.forEach((_, i) => {
       const l = $('gl' + i);
