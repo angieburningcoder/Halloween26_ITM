@@ -10,3 +10,6 @@ roster.demo.js
 *.jpg
 image-*.png
 invite*.png
+
+# 企劃書資料夾（企劃 PDF、參考圖）不進 repo
+企劃書/
