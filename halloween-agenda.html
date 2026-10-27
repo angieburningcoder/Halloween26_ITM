@@ -542,7 +542,7 @@ function initScenes() {
 
   // 現場分組：32 人 → 兩組各 16 人
   $('grp').innerHTML = GRP.map((_, i) => `<g id="gp${i}">${fig(0, 0, [[0, -80, -14, -55], [0, -80, 14, -55]], 0.6)}</g>`).join('') +
-    GTEAM.map((t, i) => `<text id="gl${i}" class="cap" x="${t.cx}" y="70" style="font-size:44px;fill:${t.color}">第 ${i + 1} 組 ・ 16 人</text>`).join('');
+    GTEAM.map((t, i) => `<text id="gl${i}" class="cap" x="${t.cx}" y="70" style="font-size:${i < 2 ? 44 : 30}px;fill:${t.color || 'var(--muted)'}"></text>`).join('');
 }
 
 // 扮裝者位置、手臂上的貼紙位置、貼紙顏色
@@ -550,15 +550,28 @@ const VOTE_X = 640;
 const VOTE_SPOTS = [0.45, 0.65, 0.85].map(k => [VOTE_X - 36 * S * k, G - (80 - 18 * k) * S]);
 const VOTE_COLORS = ['#FF4FA3', '#9BE15D', '#4FC3FF'];
 
-const GTEAM = [{ x: 180, cx: 330, color: '#FF8A1F' }, { x: 1000, cx: 1150, color: '#C9A6FF' }];
-const GRP = [...Array(32)].map((_, i) => {
-  const t = i % 2, k = Math.floor(i / 2);
-  return {
-    team: t,
-    from: [400 + (i % 8) * 95 + ((i * 37) % 30) - 15, 200 + Math.floor(i / 8) * 115 + ((i * 53) % 20) - 10],
-    to: [GTEAM[t].x + (k % 4) * 100, 200 + Math.floor(k / 4) * 115],
-  };
-});
+// 第 3 格是「還沒分組」的人，站在中間
+const GTEAM = [{ cx: 330, color: '#FF8A1F' }, { cx: 1150, color: '#C9A6FF' }, { cx: 740, color: '' }];
+const GRP = [...Array(32)].map((_, i) => ({
+  team: i % 2,
+  from: [400 + (i % 8) * 95 + ((i * 37) % 30) - 15, 200 + Math.floor(i / 8) * 115 + ((i * 53) % 20) - 10],
+  to: [0, 0],
+}));
+// 照計分台的分組排小人：最多 4 排，人多就把每排塞密一點（寬度固定 300）
+function layoutGrp() {
+  const anyTeam = ROSTER.some(p => state.team[p.name]);
+  const team = GRP.map((_, i) => !anyTeam ? i % 2 : state.team[ROSTER[i].name] ? state.team[ROSTER[i].name] - 1 : 2);
+  GTEAM.forEach((t, ti) => {
+    const ids = GRP.map((_, i) => i).filter(i => team[i] === ti);
+    const cols = Math.max(4, Math.ceil(ids.length / 4)), gap = 300 / (cols - 1);
+    ids.forEach((i, k) => {
+      GRP[i].team = ti;
+      GRP[i].to = [t.cx - 150 + (k % cols) * gap, 200 + Math.floor(k / cols) * 115];
+    });
+    $('gl' + ti).textContent = (ti < 2 ? `第 ${ti + 1} 組` : '尚未分組') + ` ・ ${ids.length} 人`;
+    $('gl' + ti).dataset.n = ids.length;
+  });
+}
 
 const PODIUM = [
   { x: 420, h: 170, r: '輸這關', t: 1, step: 1 },
@@ -689,7 +702,10 @@ const scenes = {
       mv(el, p[0], p[1] - Math.sin(Math.PI * k) * 30 + (s == null ? Math.sin(t * 3 + i) * 3 : 0));
       el.firstChild.style.stroke = k > 0.5 ? GTEAM[g.team].color : '';
     });
-    GTEAM.forEach((_, i) => ($('gl' + i).style.opacity = s == null ? 0 : clamp((s - 1.8) / 0.4)));
+    GTEAM.forEach((_, i) => {
+      const l = $('gl' + i);
+      l.style.opacity = s == null || (i === 2 && l.dataset.n == 0) ? 0 : clamp((s - 1.8) / 0.4);
+    });
   },
 
   as(t, st) {
@@ -789,6 +805,7 @@ function renderPanel() {
 }
 
 function renderLive() {
+  layoutGrp();
   [1, 2].forEach(t => {
     $('ls' + t).textContent = teamPer(t);
     $('lr' + t).innerHTML = ROUNDS.map((r, i) => {
