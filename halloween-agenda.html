@@ -233,7 +233,7 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
   </section>
 
   <!-- 遊戲預告：只露名字和一句話，不講規則 -->
-  <section class="slide" data-steps="5">
+  <section class="slide" data-steps="5" data-scene="tz">
     <div class="hd"><h1>今天的挑戰<small>Coming Up</small></h1><div class="meta">遊戲 A 三關 ＋ 遊戲 B</div></div>
     <div class="tz">
       <div class="fc" data-show="1"><div class="in"><div class="bk"><b>？</b><span>遊戲 A-1</span></div>
@@ -584,14 +584,14 @@ function initScenes() {
 
   // 遊戲預告：四張卡片正面的小圖
   $('tz1').innerHTML = `
-    <g style="stroke:var(--pasta);stroke-width:7;stroke-linecap:round"><line x1="60" y1="30" x2="166" y2="116"/><line x1="88" y1="20" x2="176" y2="106"/></g>
-    <circle class="ball" cx="180" cy="122" r="16"/>
+    <g id="tz1c" style="stroke:var(--pasta);stroke-width:7;stroke-linecap:round"><line x1="60" y1="30" x2="166" y2="116"/><line x1="88" y1="20" x2="176" y2="106"/></g>
+    <circle id="tz1b" class="ball" r="16"/>
     ${bowl(240, 190, 90, 34)}<circle class="ball" cx="228" cy="154" r="11"/><circle class="ball" cx="250" cy="150" r="11"/>`;
   $('tz2').innerHTML = `
     <path class="guide" d="M30 170 Q80 0 138 34"/>
-    <circle class="ball" cx="150" cy="40" r="16"/>
-    <polygon class="hat" points="88,104 212,104 150,190"/><ellipse class="hat" cx="150" cy="104" rx="66" ry="12"/>`;
-  $('tz3').innerHTML = `
+    <circle id="tz2b" class="ball" r="16"/>
+    <g id="tz2h"><polygon class="hat" points="88,104 212,104 150,190"/><ellipse class="hat" cx="150" cy="104" rx="66" ry="12"/></g>`;
+  $('tz3').innerHTML = `<g id="tz3h">
     <circle class="ball" cx="152" cy="84" r="22"/>
     <g style="stroke:var(--line);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none">
       <line x1="34" y1="178" x2="118" y2="126"/><line x1="46" y1="190" x2="126" y2="138"/>
@@ -599,10 +599,10 @@ function initScenes() {
       <polyline points="122,120 112,98 108,76"/><polyline points="140,112 134,90 132,68"/>
       <polyline points="162,110 166,88 168,68"/><polyline points="180,120 192,100 198,82"/>
     </g>
-    <g style="fill:var(--line)"><circle cx="112" cy="98" r="5"/><circle cx="134" cy="90" r="5"/><circle cx="166" cy="88" r="5"/><circle cx="192" cy="100" r="5"/></g>
-    <text x="236" y="70" style="font-size:34px;fill:var(--lilac)">✦</text><text x="60" y="64" style="font-size:24px;fill:var(--green)">✦</text>
-    <text x="250" y="140" style="font-size:22px;fill:var(--orange)">✦</text>`;
-  $('tz4').innerHTML = `${ground(60, 240, 190)}${tower(150, 190, 120, 140)}${pumpkin(150, 190 - 140 - 6 - 16, 16)}`;
+    <g style="fill:var(--line)"><circle cx="112" cy="98" r="5"/><circle cx="134" cy="90" r="5"/><circle cx="166" cy="88" r="5"/><circle cx="192" cy="100" r="5"/></g></g>
+    <text id="tz3s0" x="236" y="70" style="font-size:34px;fill:var(--lilac)">✦</text><text id="tz3s1" x="60" y="64" style="font-size:24px;fill:var(--green)">✦</text>
+    <text id="tz3s2" x="250" y="140" style="font-size:22px;fill:var(--orange)">✦</text>`;
+  $('tz4').innerHTML = `${ground(60, 240, 190)}<g id="tz4t"></g><g id="tz4p">${pumpkin(0, 0, 16)}</g>`;
 
   // A1 免洗筷夾南瓜（7 人）
   const guide = A1P.slice(0, -1).map((p, i) => {
@@ -791,6 +791,32 @@ const scenes = {
       const u = ((t + off) % 12) / 12;
       mv($('bt' + i), lerp(-80, 1700, u), y + Math.sin(t * 2 + i) * 30, ` scale(${1 - i * 0.2},${(1 - i * 0.2) * (0.55 + 0.45 * Math.abs(Math.sin(t * 9 + i)))})`);
     });
+  },
+
+  tz(t) {
+    // A-1 筷子夾起南瓜 → 丟進碗
+    const u1 = t % 2.4, c = Math.sin(t * 8) * (u1 < 0.6 ? 3 : 0);
+    $('tz1c').setAttribute('transform', `rotate(${c} 70 30)`);
+    const b1 = u1 < 0.6 ? [180, 122] : u1 < 1.3 ? hop([180, 122], [240, 152], 40, ease((u1 - 0.6) / 0.7)) : [240, 152];
+    $('tz1b').setAttribute('cx', b1[0]); $('tz1b').setAttribute('cy', b1[1]);
+    $('tz1b').style.opacity = u1 > 2 ? 0 : 1;
+    // A-2 南瓜沿虛線飛進帽子，帽子晃一下
+    const u2 = t % 2.2, b2 = hop([30, 170], [150, 100], 130, clamp(u2 / 1.1));
+    $('tz2b').setAttribute('cx', b2[0]); $('tz2b').setAttribute('cy', b2[1]);
+    $('tz2b').style.opacity = u2 < 1.25 ? 1 : 0;
+    const w2 = u2 > 1.1 ? 10 * Math.exp(-5 * (u2 - 1.1)) * Math.sin(14 * (u2 - 1.1)) : 0;
+    $('tz2h').setAttribute('transform', `rotate(${w2} 150 190)`);
+    // A-3 骷髏手捧著南瓜跑跑跳跳，星星閃
+    $('tz3h').setAttribute('transform', `translate(0,${-Math.abs(Math.sin(t * 5)) * 10}) rotate(${Math.sin(t * 5) * 4} 40 185)`);
+    [0, 1, 2].forEach(i => { $('tz3s' + i).style.opacity = 0.3 + 0.7 * Math.abs(Math.sin(t * 2.5 + i * 1.3)); });
+    // B 塔一根根蓋起來，南瓜掉上去晃一晃
+    const u4 = t % 5;
+    $('tz4t').innerHTML = tower(150, 190, 120, 140, clamp(u4 / 2));
+    const top4 = 190 - 140 - 6 - 16;
+    let y4 = top4, r4 = 0;
+    if (u4 < 2) y4 = -40; else if (u4 < 2.5) y4 = lerp(-40, top4, Math.pow((u4 - 2) / 0.5, 2));
+    else { const d = u4 - 2.5; r4 = 14 * Math.exp(-3 * d) * Math.sin(10 * d); }
+    $('tz4p').setAttribute('transform', `translate(150,${y4}) rotate(${r4} 0 16)`);
   },
 
   map(t, st) {
