@@ -205,6 +205,9 @@ svg text{font-family:inherit}
 @keyframes spray{0%{opacity:1;transform:translate(0,0) rotate(0)}55%{opacity:1;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}
   100%{opacity:0;transform:translate(var(--dx),calc(var(--dy) + 140px)) rotate(calc(var(--r) * 2))}}
 
+/* 最佳扮裝頒獎台 */
+.cos-svg{position:absolute;top:130px;left:0;width:1600px;height:770px}
+
 /* 計分台（S 鍵） */
 #panel{position:absolute;inset:0;background:#0d0818;display:none;z-index:10;padding:36px 60px;box-sizing:border-box;cursor:auto;user-select:text}
 #panel.open{display:block}
@@ -425,6 +428,12 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
     <div class="wins" id="wins"></div>
   </section>
 
+  <!-- 最佳扮裝前三名：Enter 依序揭曉第 3、2、1 名（名字現場喊，不顯示） -->
+  <section class="slide" data-steps="3" data-scene="cos">
+    <div class="hd"><h1>最佳扮裝｜前三名<small>Best Costume</small></h1><div class="meta">獎品：熊貓馬克杯 × 3</div></div>
+    <svg class="cos-svg" id="cos" viewBox="0 0 1600 770"></svg>
+  </section>
+
   <!-- 計分台：S 鍵開關，工作人員用 -->
   <div id="panel">
     <div class="ptop">
@@ -516,6 +525,43 @@ const a2cx = t => 330 + 120 * Math.sin(2 * Math.PI * t / 7);
 // A3：兩邊排隊位置（前 → 後）與交棒點
 const A3SLOT = { A: [300, 235, 170], B: [700, 765, 830] }, A3HAND = { A: 370, B: 630 };
 
+// 最佳扮裝頒獎台：第 2 名左、第 1 名中、第 3 名右；step = 第幾下 Enter 揭曉
+const COS = [
+  { rank: 1, x: 800, h: 280, step: 3, medal: '🥇' },
+  { rank: 2, x: 450, h: 200, step: 2, medal: '🥈' },
+  { rank: 3, x: 1150, h: 140, step: 1, medal: '🥉' },
+];
+const COS_G = 740;   // 舞台地面 y
+// 三個扮裝小人（腳在 0,0）：1 吸血鬼、2 女巫、3 木乃伊
+const COS_FIG = {
+  1: `<path d="M-6 -88 L-40 -6 L40 -6 L6 -88 Z" fill="#8B1E3F" stroke="#F3E6D0" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M-14 -92 L-24 -104 L-6 -96 M14 -92 L24 -104 L6 -96" stroke="#F3E6D0" stroke-width="2.5" fill="#8B1E3F"/>
+    <g class="fig"><line x1="0" y1="-93" x2="0" y2="-45"/><line x1="0" y1="-45" x2="-15" y2="0"/><line x1="0" y1="-45" x2="15" y2="0"/>
+      <g id="cosa1"><line x1="0" y1="-82" x2="-30" y2="-122"/><line x1="0" y1="-82" x2="30" y2="-122"/></g>
+      <circle cx="0" cy="-111" r="17"/></g>
+    <path d="M-8 -104 Q0 -98 8 -104" fill="none" stroke="#F3E6D0" stroke-width="2.5"/>
+    <path d="M-4 -102 l1.5 5 l1.5 -5 M1 -102 l1.5 5 l1.5 -5" fill="#FFF8EE"/>
+    <circle cx="-6" cy="-115" r="2" fill="#FF4F4F"/><circle cx="6" cy="-115" r="2" fill="#FF4F4F"/>
+    <polygon points="-14,-126 -15,-142 -7,-134 0,-147 7,-134 15,-142 14,-126" fill="#F4D27A" stroke="#2A1236" stroke-width="1.5"/>`,
+  2: `<g transform="rotate(-35 0 -40)"><line x1="0" y1="-120" x2="0" y2="10" stroke="#B07A3C" stroke-width="5" stroke-linecap="round"/>
+      <path d="M0 6 L-14 40 L14 40 Z" fill="#F4D27A" stroke="#B07A3C" stroke-width="2.5" stroke-linejoin="round"/></g>
+    <g class="fig"><line x1="0" y1="-93" x2="0" y2="-45"/><line x1="0" y1="-45" x2="-15" y2="0"/><line x1="0" y1="-45" x2="15" y2="0"/>
+      <line x1="0" y1="-82" x2="-22" y2="-66"/><line x1="-22" y1="-66" x2="-20" y2="-80"/>
+      <g id="cosa2"><line x1="0" y1="-82" x2="30" y2="-110"/></g>
+      <circle cx="0" cy="-111" r="17"/></g>
+    <path d="M-7 -106 Q0 -99 7 -106" fill="none" stroke="#F3E6D0" stroke-width="2.5"/>
+    <circle cx="-6" cy="-114" r="2" fill="#F3E6D0"/><circle cx="6" cy="-114" r="2" fill="#F3E6D0"/>
+    <polygon points="-14,-124 14,-124 8,-152 -14,-140" fill="#5B3A99" stroke="#F3E6D0" stroke-width="2.5" stroke-linejoin="round"/>
+    <ellipse cx="0" cy="-125" rx="26" ry="5" fill="#5B3A99" stroke="#F3E6D0" stroke-width="2.5"/><circle cx="-14" cy="-140" r="4" fill="#9BE15D"/>`,
+  3: `<g class="fig"><line x1="0" y1="-93" x2="0" y2="-45"/><line x1="0" y1="-45" x2="-15" y2="0"/><line x1="0" y1="-45" x2="15" y2="0"/>
+      <g id="cosa3"><line x1="0" y1="-82" x2="36" y2="-84"/><line x1="0" y1="-76" x2="34" y2="-74"/></g></g>
+    <path d="M-6 -86 L6 -80 M-6 -70 L6 -64 M-6 -56 L6 -50 M-14 -32 L-4 -28 M14 -32 L4 -28" stroke="#C9B89A" stroke-width="3"/>
+    <circle cx="0" cy="-111" r="17" fill="#F3E6D0" stroke="#F3E6D0" stroke-width="3"/>
+    <path d="M-17 -118 L17 -112 M-17 -106 L17 -100 M-15 -96 L13 -92" stroke="#C9B89A" stroke-width="3"/>
+    <circle cx="-6" cy="-111" r="3" fill="#2A1236"/><circle cx="6" cy="-109" r="3" fill="#2A1236"/>
+    <path d="M24 -96 l6 -6 M30 -88 l6 -4" stroke="#C9B89A" stroke-width="2.5"/>`,
+};
+
 // 流程地圖：火柴人勇者沿路討伐南瓜。起點 + 五站（上下交錯，路牌放在小路不會經過的那一側）
 const MAP0 = [70, 450];
 const MAPS = [
@@ -570,6 +616,23 @@ function initScenes() {
     ${bat('bt0')}${bat('bt1')}${bat('bt2')}
     <path d="M0 900 L0 820 Q200 780 400 830 T800 815 T1200 830 T1600 800 L1600 900 Z" fill="#120B22"/>`;
   $('cvp').innerHTML = pumpkin(0, 15, 80, true);
+
+  // 最佳扮裝：布幕、聚光燈、頒獎台、扮裝小人、彩帶
+  const curtain = (x, d) => `<path d="M${x} 0 H${x + 170 * d} Q${x + 120 * d} 300 ${x + 150 * d} 770 H${x} Z" fill="#5B1E4A" stroke="#8B1E3F" stroke-width="3"/>
+    ${[40, 85, 125].map(k => `<path d="M${x + k * d} 0 Q${x + (k - 25) * d} 380 ${x + (k + 5) * d} 770" fill="none" stroke="#3A1030" stroke-width="5"/>`).join('')}`;
+  $('cos').innerHTML = `
+    <defs><linearGradient id="cosbeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9B0" stop-opacity="0"/>
+      <stop offset="1" stop-color="#FFE9B0" stop-opacity=".45"/></linearGradient></defs>
+    <text id="coslead" class="cap" x="800" y="80" style="font-size:40px">投票結果揭曉！誰是今天最會扮的人？</text>
+    ${COS.map(c => `<polygon id="cosb${c.rank}" points="${c.x - 30},0 ${c.x + 30},0 ${c.x + 180},${COS_G - c.h} ${c.x - 180},${COS_G - c.h}" fill="url(#cosbeam)" opacity="0"/>`).join('')}
+    ${ground(160, 1440, COS_G)}
+    ${COS.map(c => `<rect class="bowl" x="${c.x - 150}" y="${COS_G - c.h}" width="300" height="${c.h}" rx="10" style="fill:var(--panel)"/>
+      <text class="cap" x="${c.x}" y="${COS_G - c.h / 2 + 34}" style="font-size:96px;fill:var(--muted)">${c.rank}</text>
+      <g id="cosf${c.rank}" opacity="0">${COS_FIG[c.rank]}</g>
+      <text id="cosl${c.rank}" class="cap" x="${c.x}" y="${COS_G - c.h - 270}" style="font-size:44px;fill:var(--orange);opacity:0">${c.medal} 第 ${c.rank} 名</text>`).join('')}
+    <g id="cosconf">${[...Array(46)].map((_, i) => `<rect width="${10 + i % 3 * 4}" height="${6 + i % 2 * 5}" rx="2"
+      fill="${['#FF8A1F', '#C9A6FF', '#9BE15D', '#4FC3FF', '#FF4FA3', '#F4D27A'][i % 6]}"/>`).join('')}</g>
+    ${curtain(0, 1)}${curtain(1600, -1)}`;
 
   // 流程地圖：小路、路牌、地標、走路的南瓜
   const signW = s => [...s].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? 28 : 15), 0) + 48;
@@ -862,6 +925,33 @@ const scenes = {
       const o = v[3 - n], lead = done && v[n] > 0 && v[n] >= o;
       $('lc' + n).textContent = v[n] === o ? '🤝 平手' : '🏆 領先';
       $('live').querySelector('.t' + n).classList.toggle('ahead', lead);
+    });
+  },
+
+  cos(t, st) {
+    // 每按一下：聚光燈亮 → 小人從上面掉到頒獎台、彈一下 → 名次字浮出；之後各自原地動
+    COS.forEach(c => {
+      const s = st(c.step), on = s != null;
+      $('cosb' + c.rank).setAttribute('opacity', on ? 0.4 + 0.6 * clamp(s / 0.4) + 0.08 * Math.sin(t * 3) : 0);
+      const k = on ? backOut(clamp((s - 0.3) / 0.6)) : 0, top = COS_G - c.h;
+      const idle = on && s > 0.9 ? (c.rank === 1 ? -Math.abs(Math.sin(t * 4)) * 16 : c.rank === 2 ? Math.sin(t * 3) * 5 : 0) : 0;
+      const tilt = on && c.rank === 3 ? Math.sin(t * 3) * 6 : 0;
+      $('cosf' + c.rank).setAttribute('transform', `translate(${c.x},${lerp(-200, top, clamp(k)) + idle}) rotate(${tilt}) scale(${1.5 * (on ? 1 : 0)})`);
+      $('cosf' + c.rank).setAttribute('opacity', on ? clamp((s - 0.3) / 0.2) : 0);
+      $('cosl' + c.rank).style.opacity = on ? clamp((s - 0.8) / 0.4) : 0;
+    });
+    $('cosa1').setAttribute('transform', `rotate(${Math.sin(t * 8) * 8} 0 -82)`);
+    $('cosa2').setAttribute('transform', `rotate(${Math.sin(t * 5) * 18} 0 -82)`);
+    $('cosa3').setAttribute('transform', `rotate(${Math.sin(t * 4) * 6} 0 -82)`);
+    $('coslead').style.opacity = st(1) == null ? 0.6 + 0.4 * Math.sin(t * 2.5) : 0;
+    // 第 1 名揭曉後：彩帶從上面一直飄下來
+    const s1 = st(3);
+    [...$('cosconf').children].forEach((r, i) => {
+      if (s1 == null) { r.style.display = 'none'; return; }
+      r.style.display = '';
+      const sp = 140 + (i * 37) % 120, y = ((i * 97) % 770 + s1 * sp) % 820 - 40 - (s1 < 2 ? (1 - s1 / 2) * 800 : 0);
+      const x = 200 + (i * 211) % 1200 + Math.sin(s1 * 2 + i) * 30;
+      r.setAttribute('transform', `translate(${x},${y}) rotate(${(i * 83 + s1 * 200) % 360})`);
     });
   },
 
