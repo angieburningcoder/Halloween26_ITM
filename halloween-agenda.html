@@ -129,6 +129,16 @@ svg text{font-family:inherit}
 .slot{flex:1;border:3px dashed var(--purple);border-radius:24px;padding:20px 10px;text-align:center;font-size:36px;color:var(--muted)}
 .slot.got{border-style:solid;border-color:var(--orange);color:var(--ink)}
 .slot small{display:block;font-size:20px;color:var(--muted)}
+#dname.win{animation:bounce .6s}
+.cele{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cele .who{opacity:0;transform-box:fill-box;transform-origin:50% 100%}
+.cele.on .who{animation:popIn .5s cubic-bezier(.3,1.6,.5,1) forwards}
+.cele .bit{opacity:0;transform-box:fill-box;transform-origin:center}
+.cele.on .bit{animation:spray 1.8s ease-out .35s forwards}
+@keyframes bounce{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+@keyframes spray{0%{opacity:1;transform:translate(0,0) rotate(0)}55%{opacity:1;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}
+  100%{opacity:0;transform:translate(var(--dx),calc(var(--dy) + 140px)) rotate(calc(var(--r) * 2))}}
 
 /* 計分台（S 鍵） */
 #panel{position:absolute;inset:0;background:#0d0818;display:none;z-index:10;padding:36px 60px;box-sizing:border-box;cursor:auto;user-select:text}
@@ -325,6 +335,7 @@ table.stat{border-collapse:collapse;width:100%;font-size:22px}
   <section class="slide" data-steps="0" id="lotto">
     <div class="hd"><h1>抽獎｜清華小熊吊飾 × 4<small>Lucky Draw</small></h1><div class="meta">依籤數比例抽 ・ 中過不重複</div></div>
     <div class="drum"><div id="dname"></div><div id="dsub"></div></div>
+    <svg class="cele" id="cele" viewBox="0 0 1600 900"></svg>
     <div class="wins" id="wins"></div>
   </section>
 
@@ -543,6 +554,22 @@ function initScenes() {
   // 現場分組：32 人 → 兩組各 16 人
   $('grp').innerHTML = GRP.map((_, i) => `<g id="gp${i}">${fig(0, 0, [[0, -80, -14, -55], [0, -80, 14, -55]], 0.6)}<text class="lbl" y="26">${esc(ROSTER[i].name)}</text></g>`).join('') +
     GTEAM.map((t, i) => `<text id="gl${i}" class="cap" x="${t.cx}" y="70" style="font-size:${i < 2 ? 44 : 30}px;fill:${t.color || 'var(--muted)'}"></text>`).join('');
+
+  // 抽獎慶祝：左邊小人捧禮物、右邊小人拉拉炮，彩帶從拉炮口往左上噴
+  const gift = `<rect x="-24" y="-72" width="48" height="36" rx="4" fill="#FF8A1F" stroke="#F3E6D0" stroke-width="2.5"/>
+    <path d="M0 -72 V-36 M-24 -56 H24" stroke="#C9A6FF" stroke-width="6"/>
+    <ellipse cx="-8" cy="-77" rx="9" ry="5" fill="#C9A6FF"/><ellipse cx="8" cy="-77" rx="9" ry="5" fill="#C9A6FF"/>`;
+  const popper = `<polygon points="18,-110 28,-114 32,-146 6,-144" fill="#9BE15D" stroke="#F3E6D0" stroke-width="2"/>`;
+  const bits = [...Array(26)].map((_, i) => {
+    const a = (195 + (i * 47) % 75) * Math.PI / 180, d = 110 + (i * 61) % 180;
+    return `<rect class="bit" x="1465" y="300" width="${10 + i % 3 * 4}" height="${6 + i % 2 * 5}" rx="2"
+      fill="${['#FF8A1F', '#C9A6FF', '#9BE15D', '#4FC3FF', '#FF4FA3', '#F4D27A'][i % 6]}"
+      style="--dx:${Math.round(Math.cos(a) * d)}px;--dy:${Math.round(Math.sin(a) * d)}px;--r:${(i * 83) % 360}deg"/>`;
+  }).join('');
+  $('cele').innerHTML = `
+    <g class="who"><g transform="translate(160,500) scale(1.4)">${fig(0, 0, [[0, -80, -22, -58], [0, -80, 22, -58]], 1)}${gift}</g></g>
+    <g class="who"><g transform="translate(1440,500) scale(1.4)">${fig(0, 0, [[0, -80, 22, -112], [0, -80, -14, -55]], 1)}${popper}</g></g>
+    ${bits}`;
 }
 
 // 扮裝者位置、手臂上的貼紙位置、貼紙顏色
@@ -829,9 +856,13 @@ function renderWins() {
 }
 function lottoIdle() {
   const n = state.drawn.length;
-  $('dname').textContent = n >= PRIZES ? '抽獎結束 🎉' : `按 Enter 抽第 ${n + 1} 位`;
-  $('dsub').textContent = n >= PRIZES ? 'Happy Halloween 🎃' : '';
+  $('dname').textContent = n >= PRIZES ? '抽獎結束 🎉' : '開始抽獎';
+  $('dsub').textContent = n >= PRIZES ? 'Happy Halloween 🎃' : `第 ${n + 1} 位`;
+  cheer(false);
 }
+
+// 中獎慶祝：小人和彩帶都是 CSS 動畫，加上 .on 播一次就停
+const cheer = on => { $('cele').classList.toggle('on', on); $('dname').classList.toggle('win', on); };
 
 // 依籤數比例抽一位，中過的人不再抽
 let rolling = false;
@@ -842,13 +873,14 @@ function draw() {
   for (const [p, w] of pool) { if ((r -= w) < 0) { win = p; break; } }
   rolling = true;
   const el = $('dname'), names = pool.map(([p]) => p.name);
-  el.classList.add('rolling'); $('dsub').textContent = '';
+  el.classList.add('rolling'); $('dsub').textContent = ''; cheer(false);
   let delay = 50;
   const tick = () => {
     if (delay > 320) {
       rolling = false; el.classList.remove('rolling');
       state.drawn.push(win.name); save();
       el.textContent = win.name; $('dsub').textContent = `恭喜！（${tickets(win)} 籤）`;
+      cheer(true);
       return;
     }
     el.textContent = names[Math.floor(Math.random() * names.length)];
